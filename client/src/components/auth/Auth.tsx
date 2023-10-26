@@ -11,7 +11,12 @@ const Auth = () => {
   return (
     <section className="flex flex-row w-screen h-screen overflow-x-hidden ">
       <div className="w-[60%] flex items-center justify-center">
-        <img src="/images/auth-bg.jpg" alt="analytic" className=" h-[70%]" />
+        <img
+          src="/images/auth-bg.avif"
+          alt="analytic"
+          className=" h-[70%] select-none "
+          draggable={false}
+        />
       </div>
       <div className="w-[40%] flex items-center justify-center">
         {authState.mode === "login" && <Login />}

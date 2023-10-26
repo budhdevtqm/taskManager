@@ -45,7 +45,7 @@ const ViewUser: React.FC<ModleProps> = ({ open, setOpen, userData }) => {
           <div className="flex my-1">
             <span className="w-[50%] text-gray-500">Role</span>
             <span className="w-[50%] flex">
-              <p className="bg-secondary px-4 text-[14px] text-center rounded-full text-white shadow-lg">
+              <p className="text-[14px] text-center font-bold">
                 {userData?.role?.toUpperCase()}
               </p>
             </span>

@@ -29,12 +29,12 @@ const Login = () => {
     const { email, password } = values;
     let errors: any = {};
     if (!email || email.trim() === "") {
-      errors.email = "Required!";
+      errors.email = "Please enter email!";
     } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
       errors.email = "Invalid Email";
     }
     if (!password || password.trim() === "") {
-      errors.password = "Required!";
+      errors.password = "Please enter password!";
     } else if (
       !/^(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[@#$%^&+=!])(?=\S+$).{8,}$/.test(
         password
@@ -79,11 +79,13 @@ const Login = () => {
             name="email"
             id="email"
             className="rounded p-1 w-full outline-none text-black"
-            placeholder="username@example.com"
+            placeholder="Enter your email"
             value={formValues.email}
             onChange={handleChange}
           />
-          {errors.email && <div className=" text-error">{errors.email}</div>}
+          {errors.email && (
+            <div className="text-errorWhite text-[13px]">{errors.email}</div>
+          )}
         </div>
         <div className="flex flex-col gap-2">
           <label htmlFor="password">Password</label>
@@ -91,12 +93,13 @@ const Login = () => {
             type="password"
             name="password"
             id="password"
+            placeholder="Enter your password"
             value={formValues.password}
             onChange={handleChange}
             className="rounded p-1 w-full outline-none text-black"
           />
           {errors.password && (
-            <div className=" text-error">{errors.password}</div>
+            <div className="text-errorWhite text-[13px]">{errors.password}</div>
           )}
         </div>
         <div className="flex items-center justify-center">
@@ -113,7 +116,7 @@ const Login = () => {
           New user please{" "}
           <strong
             onClick={() => dispatch(toggleMode())}
-            className="text-italic cursor-pointer hover:italic"
+            className="text-italic cursor-pointer"
           >
             Sign Up
           </strong>

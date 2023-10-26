@@ -3,8 +3,8 @@ import UploadImage from "components/common/UploadImage";
 import React, { useEffect, useState } from "react";
 import { toast } from "react-hot-toast";
 import { useNavigate } from "react-router-dom";
-import { useAppDispatch, useAppSelector } from "redux/hooks";
-import { ProfileValues, getProfile, updateProfile } from "redux/userSlice";
+import { useAppDispatch } from "redux/hooks";
+import { getProfile, updateProfile } from "redux/userSlice";
 
 interface Values {
   name: string;
@@ -27,6 +27,7 @@ const UpdateForm = () => {
   const navigate = useNavigate();
   const dispatch = useAppDispatch();
   const [errors, setErrors] = useState<ErrorValues>({});
+  const [file, setFile] = useState<any>("");
 
   const validate = (values: Values) => {
     let errors: ErrorValues = {};
@@ -94,10 +95,13 @@ const UpdateForm = () => {
   return (
     <div className="w-[60%] mx-auto bg-white p-10 rounded-lg font-normal border-2 border-rounded">
       <h4 className="text-center my-2 font-bold">Update Profile</h4>
-      <form className="p-8 flex flex-col gap-2" onSubmit={submitHandler}>
+      <form
+        className="p-8 flex flex-col gap-2"
+        encType="multipart/form-data"
+        onSubmit={submitHandler}
+      >
         <div className="flex flex-col gap-2">
-          {/* <label htmlFor="name">User Name</label> */}
-          <UploadImage multiple={false} accept="" />
+          {/* <UploadImage multiple={false} accept="" /> */}
           {/* {errors.image && (
             <p className="text-[13px] text-red-500">{errors.image}</p>
           )} */}

@@ -251,7 +251,7 @@ module.exports.signin = async (values) => {
       }
 
       const token = await jwt.sign({ role, userId }, process.env.JWT_PRIVATE, {
-        expiresIn: '1h',
+        expiresIn: "1h",
       });
 
       resolve({
@@ -423,6 +423,17 @@ module.exports.updateProfile = async (values) => {
       });
     } catch (error) {
       reject({ ok: false, message: "Something went wrong!", status: 400 });
+    }
+  });
+};
+
+module.exports.upload = async (req) => {
+  return new Promise(async (resolve, reject) => {
+    try {
+      const file = req.file;
+      console.log(file, "file");
+    } catch (error) {
+      reject({ ...error });
     }
   });
 };

@@ -1,10 +1,11 @@
 import React, { useEffect, useState } from "react";
-import { getDate, status, verifyStatus } from "common/utils";
+import { getDate, verifyStatus } from "common/utils";
 import { useNavigate, useParams } from "react-router-dom";
 import { useAppDispatch, useAppSelector } from "redux/hooks";
 import { deleteTask, getTask, TaskValues, updateStatus } from "redux/taskSlice";
 import { Toaster, toast } from "react-hot-toast";
 import Footer from "components/layout/Footer";
+import { BsPencil, BsTrash } from "react-icons/bs";
 
 interface ErrorValues {
   progressStatus?: String;
@@ -121,27 +122,25 @@ const Task: React.FC = () => {
   return (
     <>
       {task !== null && (
-        <div>
+        <div className="min-h-full">
           <div className="flex px-8 py-4 items-center justify-between">
-            <h1 className="font-bold text-gray-500">Task</h1>
+            <h1 className="font-bold text-primary text-[24px]">Task</h1>
             <span
               title="Due Date"
-              className="text-[14px] text-white bg-primary p-1 rounded "
+              className="text-[16px] text-primary p-1 rounded "
             >
               {getDate(task?.dueDate)}
             </span>
-            {/* <button
-          className="flex items-center gap-3 hover:bg-primary px-4 py-1 hover:text-white rounded text-primary border:primary bg-white"
-          type="button"
-        >
-          Add Case
-        </button> */}
           </div>
-          <div className="px-8 py-4">
+          <div className="grid">
+            <div className=""></div>
+            <div></div>
+          </div>
+          {/* <div className="px-8 py-4">
             <div className="bg-white py-2 px-8">
               <h6 className="text-center my-2 underline">Discription</h6>
               <p
-                className="text-wrap text-[15px] font-light text-center break-all rounded bg-[#EAF4FC] p-2 "
+                className="text-wrap text-[15px] font-light text-center break-all rounded bg-secondary p-2 "
                 title="Task Info"
               >
                 {task.title}
@@ -173,28 +172,33 @@ const Task: React.FC = () => {
                 </span>
               </div>
             </div>
-          </div>
-          {isOperational() && (
+          </div> */}
+          {/* {isOperational() && (
             <div className="flex items-center gap-4 justify-end px-8">
-              <button
+              <BsPencil
                 onClick={() => navigate(`/home/task/update/${taskId}`)}
-                className="rounded-lg px-4 py-2 bg-gray-600 text-gray-100 hover:bg-gray-700 duration-300"
-                type="button"
-              >
-                Edit
-              </button>
-              <button
+                className=" cursor-pointer"
+              />
+              <BsTrash
                 onClick={() => deleteHandler(taskId)}
-                className="rounded-lg px-4 py-2 bg-red-600 text-red-100 hover:bg-red-700 duration-300"
-                type="button"
-              >
-                Delete
-              </button>
+                className=" cursor-pointer"
+              />
             </div>
-          )}
+          )} */}
 
-          {/* {localStorage.getItem("role") === "user" && ( */}
-          {/* <div className="flex items-center justify-center my-8">
+          <Toaster />
+        </div>
+      )}
+      <Footer />
+    </>
+  );
+};
+
+export default Task;
+
+/* {localStorage.getItem("role") === "user" && ( */
+
+/* <div className="flex items-center justify-center my-8">
             <form
               className="p-8 bg-white rounded shadow-xl w-[40%]"
               onSubmit={updateHandler}
@@ -241,14 +245,6 @@ const Task: React.FC = () => {
                 </button>
               </div>
             </form>
-          </div> */}
-          {/* )} */}
-          <Footer/>
-          <Toaster />
-        </div>
-      )}
-    </>
-  );
-};
+          </div> */
 
-export default Task;
+/* )} */

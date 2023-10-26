@@ -4,7 +4,7 @@ export const baseURL = "http://localhost:4000";
 
 export const authToken = localStorage.getItem("token");
 
-export const types = ["Frontend", "Backend", "Testing", "Design", "FullStack"]
+export const types = ["Frontend", "Backend", "Testing", "Design", "FullStack"];
 
 export const status = ["pending", "in progress", "complete"];
 
@@ -50,39 +50,18 @@ export const stampToInputDate = (stamp) => {
 };
 
 export const makeTitlePerfect = (text) => {
-  if (text.length < 42) {
+  if (text.length < 150) {
     return text;
   }
-  return text.substring(0, 42) + "...";
+  return text.substring(0, 150) + "...";
 };
 
-export const Priority = (priority) => {
+export const priorityClass = (priority) => {
   if (priority === "low") {
-    return (
-      <span
-        className="bg-green-500 text-[13px] text-white font-semibold  px-[18px] rounded-xl"
-        title={priority}
-      >
-        {priority[0].toUpperCase()}
-      </span>
-    );
+    return "border border-green-500 ";
   } else if (priority === "medium") {
-    return (
-      <span
-        className="bg-yellow-500 text-[13px] text-white font-semibold  px-[18px] rounded-xl"
-        title={priority}
-      >
-        {priority[0].toUpperCase()}
-      </span>
-    );
+    return "border border-yellow-500";
   } else {
-    return (
-      <span
-        className="bg-orange-700 text-[13px] text-white px-[18px] font-semibold rounded-xl"
-        title={priority}
-      >
-        {priority[0].toUpperCase()}
-      </span>
-    );
+    return "border border-red-500";
   }
 };

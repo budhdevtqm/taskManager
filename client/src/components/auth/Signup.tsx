@@ -38,18 +38,18 @@ const Signup = () => {
     const { name, email, password } = values;
 
     if (!name || name.trim() === "") {
-      errors.name = "Required!";
+      errors.name = "Please enter name!";
     } else if (name.trim().length < 3) {
       errors.name = "name must be of 3 characters!";
     }
 
     if (!email || email.trim() === "") {
-      errors.email = "Required!";
+      errors.email = "Please enter email!";
     } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
       errors.email = "Invalid Email!";
     }
     if (!password || password.trim() === "") {
-      errors.password = "Required!";
+      errors.password = "Please enter password!";
     } else if (
       !/^(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[@#$%^&+=!])(?=\S+$).{8,}$/.test(
         password
@@ -96,11 +96,14 @@ const Signup = () => {
             type="text"
             name="name"
             id="name"
+            placeholder="Enter full name"
             className="rounded p-1 w-full outline-none text-black"
             value={formValues.name}
             onChange={handleChange}
           />
-          {errors.name && <div className=" text-error">{errors?.name}</div>}
+          {errors.name && (
+            <div className="text-errorWhite text-[13px]">{errors?.name}</div>
+          )}
         </div>
         <div className="flex flex-col gap-2">
           <label htmlFor="email">Email</label>
@@ -109,11 +112,13 @@ const Signup = () => {
             name="email"
             id="email"
             className="rounded p-1 w-full outline-none text-black"
-            placeholder="username@example.com"
+            placeholder="Enter your email"
             value={formValues.email}
             onChange={handleChange}
           />
-          {errors.email && <div className=" text-error">{errors.email}</div>}
+          {errors.email && (
+            <div className="text-errorWhite text-[13px]">{errors.email}</div>
+          )}
         </div>
         <div className="flex flex-col gap-2">
           <label htmlFor="password">Password</label>
@@ -122,11 +127,12 @@ const Signup = () => {
             name="password"
             id="password"
             className="rounded p-1 w-full outline-none text-black"
+            placeholder="Add your password"
             value={formValues.password}
             onChange={handleChange}
           />
           {errors.password && (
-            <div className=" text-error">{errors.password}</div>
+            <div className="text-errorWhite text-[13px]">{errors.password}</div>
           )}
         </div>
         <div className="flex items-center justify-center">
@@ -143,7 +149,7 @@ const Signup = () => {
           Already have account please{" "}
           <strong
             onClick={() => dispatch(toggleMode())}
-            className="text-italic cursor-pointer hover:italic"
+            className="text-italic cursor-pointer"
           >
             Login
           </strong>

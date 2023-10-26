@@ -2,7 +2,8 @@ import React, { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { getTasks } from "redux/taskSlice";
 import { useAppDispatch, useAppSelector } from "redux/hooks";
-import { verifyStatus, makeTitlePerfect, Priority } from "common/utils";
+import { verifyStatus, makeTitlePerfect, priorityClass } from "common/utils";
+import Footer from "components/layout/Footer";
 
 const Tasks: React.FC = () => {
   const navigate = useNavigate();
@@ -17,26 +18,68 @@ const Tasks: React.FC = () => {
       return;
     }
   };
+  console.log("tasks", tasks);
 
   useEffect(() => {
     getMyTasks();
   }, []);
 
   return (
-    <div>
-      <div className="flex justify-between items-center px-8 py-4 ">
-        <h1 className="font-bold text-primary text-[24px]">Tasks</h1>
-        {localStorage.getItem("role") !== "user" && (
-          <button
-            className="flex border border-primary items-center gap-3 hover:bg-primary px-4 py-1 hover:text-white rounded text-primary border:primary bg-white"
-            type="button"
-            onClick={() => navigate("/home/task/create")}
-          >
-            Add Task
-          </button>
-        )}
+    <>
+      <div className="min-h-full">
+        <div className="flex justify-between items-center px-8 py-4">
+          <h1 className="font-bold text-primary text-[24px]">Tasks</h1>
+          {localStorage.getItem("role") !== "user" && (
+            <button
+              className="flex border border-primary items-center gap-3 hover:bg-primary px-4 py-1 hover:text-white rounded text-primary border:primary bg-white"
+              type="button"
+              onClick={() => navigate("/home/task/create")}
+            >
+              Add Task
+            </button>
+          )}
+        </div>
+        {/*  */}
+        <div className="grid grid-cols-3 gap-4 w-[90%] my-8 mx-auto">
+          {tasks.length === 0 && (
+            <div className="w-full h-full flex items-center justify-center font-bold text-[34px]">
+              No Task Found!
+            </div>
+          )}
+          {tasks.length !== 0 &&
+            tasks.map((task: any) => (
+              <div
+                key={task._id}
+                className={`flex flex-col bg-white rounded-lg shadow-lg  ${priorityClass(
+                  task.priority
+                )}`}
+              >
+                <div className="flex items-center mt-2">
+                  <h3 className="font-bold text-primary px-4 rounded-xl text-m">
+                    {task.type}
+                  </h3>
+                </div>
+                <p
+                  onClick={() => navigate(`/home/task/${task._id}`)}
+                  className="text-[14px] text-wrap px-4 pb-4 pt-2 break-all min-h-[60px] cursor-pointer"
+                >
+                  {makeTitlePerfect(task.title)}
+                </p>
+              </div>
+            ))}
+        </div>
       </div>
-      {/* <div className="flex py-4 px-8 items-center justify-between">
+      <Footer />
+    </>
+  );
+};
+
+export default Tasks;
+
+/*
+
+
+<div className="flex py-4 px-8 items-center justify-between">
         <h4 className="font-bold text-gray-500 italic">Filter</h4>
         <form className="flex items-center justify-evenly gap-8">
           <div>
@@ -89,37 +132,7 @@ const Tasks: React.FC = () => {
             </button>
           </div>
         </form>
-      </div> */}
-      <div className="flex flex-wrap gap-4 items-center w-[80%] my-8 mx-auto">
-        {tasks.length === 0 && (
-          <div className="w-full h-full flex items-center justify-center font-bold text-[34px]">
-            No Task Found!
-          </div>
-        )}
-        {tasks.length !== 0 &&
-          tasks.map((task: any) => (
-            <div
-              key={task._id}
-              className="w-[150px] bg-white p-4 rounded-lg cursor-pointer shadow-lg"
-              onClick={() => navigate(`/home/task/${task._id}`)}
-            >
-              <p className="text-[12px] text-wrap mb-2 break-all h-[40px]">
-                {makeTitlePerfect(task.title)}
-              </p>
-              <span className="flex justify-between items-center mb-2">
-                <span className="text-[13px]">Priority</span>
-                {Priority(task.priority)}
-              </span>
-              <span className="flex justify-center items-center my-2">
-                <span className="bg-lightBlack text-white py-1 shadow-lg px-4 rounded-xl text-xs">
-                  {task.type}
-                </span>
-              </span>
-            </div>
-          ))}
       </div>
-    </div>
-  );
-};
 
-export default Tasks;
+
+*/

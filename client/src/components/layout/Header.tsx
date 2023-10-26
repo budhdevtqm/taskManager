@@ -14,7 +14,7 @@ const Header = () => {
     );
   };
   return (
-    <div className="w-full h-full flex items-center justify-between px-4 bg-[#EAF4FC]">
+    <div className="w-full h-full flex items-center justify-between px-4 bg-white">
       <NavLink
         to="/"
         className="text-xl italic bg-primary rounded-lg p-2 text-white"

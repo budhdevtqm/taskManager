@@ -45,14 +45,14 @@ const Navbar = () => {
         {links.map((link: Link, index) => (
           <li
             key={index}
-            className="w-[100%]  flex items-center justify-evenly"
+            className="w-[100%]  flex items-center"
           >
             <NavLink
               to={link.path}
               className={({ isActive }) =>
                 isActive
-                  ? "text-center bg-lightBlack px-4 w-full py-2 bg-white  text-primary"
-                  : "text-center text-white py-2"
+                  ? "  px-8 w-full py-2 bg-secondary  text-primary"
+                  : " text-white py-2 px-8 w-full"
               }
             >
               {link.label}

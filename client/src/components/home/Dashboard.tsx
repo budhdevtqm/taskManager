@@ -3,7 +3,7 @@ import Tasks from "./Tasks";
 
 const Dashboard = () => {
   return (
-    <section>
+    <section className="h-full">
       {/* All Tasks */}
       <Tasks />
     </section>

@@ -73,20 +73,20 @@ const Users = () => {
     <>
       {open && <ViewUser open={open} setOpen={handleClose} userData={user} />}
       {!open && (
-        <div className="w-full h-full ">
+        <div className="w-full min-h-full ">
           <div className="flex items-center justify-between px-8 py-4 ">
-            <p className="font-bold text-gray-500">Users</p>
+            <h1 className="font-bold text-primary text-[24px]">Users</h1>
             <button
-              className="flex items-center gap-3 hover:bg-primary px-4 py-1 hover:text-white rounded text-primary border:primary bg-white"
+              className="flex items-center gap-3 hover:bg-primary px-4 py-1 hover:text-white rounded text-primary border:primary bg-white border border-primary"
               type="button"
               onClick={() => navigate("/users/create")}
             >
               ADD
             </button>
           </div>
-          <div className=" w-[80%] h-full my-4 mx-auto rounded-lg">
+          <div className=" w-[90%] h-full my-4 mx-auto rounded-lg mb-4">
             {users && (
-              <table className="min-w-full leading-normal">
+              <table className="min-w-full leading-normal shadow-xl">
                 <thead>
                   <tr>
                     <th className="px-5 py-3 border-b-2 border-gray-200 bg-gray-100 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
@@ -101,7 +101,7 @@ const Users = () => {
                     <th className="px-5 py-3 border-b-2 border-gray-200 bg-gray-100 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
                       Verified
                     </th>
-                    <th className="px-5 py-3 border-b-2 border-gray-200 bg-gray-100">
+                    <th className="px-5 py-3 border-b-2 border-gray-200 bg-gray-100 font-semibold text-gray-700">
                       Permissions
                     </th>
                     <th className="px-5 py-3 border-b-2 border-gray-200 bg-gray-100"></th>

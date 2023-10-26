@@ -4,6 +4,7 @@ const { signupValidation } = require("../validations/userValidation");
 const controller = require("../controllers/userControllers");
 const { auth, authSuperAdmin } = require("../middlewares/accessMiddlewares");
 
+router.post("/upload-image/profile", [auth], controller.uploadImage)
 router.patch("/update/my/profile", [auth], controller.updateMyProfile);
 router.get("/my/profile", [auth], controller.getMyProfile);
 router.get("/get/users", [auth], controller.allUser);
