@@ -108,7 +108,7 @@ const UpdateForm = () => {
         </div>
 
         <div className="flex flex-col gap-2">
-          <label htmlFor="name">User Name</label>
+          <label className="text-gray-500 font-semibold" htmlFor="name">User Name</label>
           <input
             type="text"
             id="name"
@@ -122,7 +122,7 @@ const UpdateForm = () => {
           )}
         </div>
         <div className="flex flex-col gap-2">
-          <label htmlFor="email">Email</label>
+          <label className="text-gray-500 font-semibold" htmlFor="email">Email</label>
           <input
             type="text"
             name="email"
@@ -133,7 +133,7 @@ const UpdateForm = () => {
           />
         </div>
         <div className="flex flex-col gap-2">
-          <label htmlFor="password">Password</label>
+          <label className="text-gray-500 font-semibold" htmlFor="password">Password</label>
           <input
             type="password"
             name="password"

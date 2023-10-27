@@ -67,15 +67,7 @@ interface Errors {
   progressStatus?: string;
 }
 
-const error = {
-  // title: "",
-  // project: "",
-  // dueDate: "",
-  // type: "",
-  // priority: "",
-  // members: "",
-  // progressStatus: "",
-};
+const error = {};
 
 const TaskForm: React.FC = () => {
   const [members, setMembers] = useState<[]>([]);
@@ -255,7 +247,7 @@ const TaskForm: React.FC = () => {
       <div className="flex flex-col w-[50%] mx-auto my-8  p-8 bg-white rounded-lg shadow ">
         <form className="flex gap-4 flex-col mb-8" onSubmit={submitHandler}>
           <div className="flex flex-col gap-2">
-            <label htmlFor="title">Title</label>
+            <label className="text-gray-500 font-semibold" htmlFor="title">Title</label>
             <input
               type="text"
               name="title"
@@ -269,7 +261,7 @@ const TaskForm: React.FC = () => {
             ) : null}
           </div>
           <div className="flex flex-col gap-2">
-            <label htmlFor="assignTo">Assign To</label>
+            <label className="text-gray-500 font-semibold" htmlFor="assignTo">Assign To</label>
             <MultiSelect
               options={users}
               value={members}
@@ -281,7 +273,7 @@ const TaskForm: React.FC = () => {
             ) : null}
           </div>
           <div className="flex flex-col gap-2">
-            <label htmlFor="project">Project</label>
+            <label className="text-gray-500 font-semibold" htmlFor="project">Project</label>
             <select
               className="rounded border p-1 w-full outline-none text-black"
               name="project"
@@ -302,7 +294,7 @@ const TaskForm: React.FC = () => {
             ) : null}
           </div>
           <div className="flex flex-col gap-2">
-            <label htmlFor="type">Type</label>
+            <label className="text-gray-500 font-semibold" htmlFor="type">Type</label>
             <select
               className="rounded border p-1 w-full outline-none text-black"
               name="type"
@@ -326,7 +318,7 @@ const TaskForm: React.FC = () => {
           </div>
 
           <div className="flex flex-col gap-2">
-            <label htmlFor="dueDate">Due Date</label>
+            <label className="text-gray-500 font-semibold" htmlFor="dueDate">Due Date</label>
             <input
               type="date"
               name="dueDate"
@@ -341,7 +333,7 @@ const TaskForm: React.FC = () => {
           </div>
 
           <div className="flex flex-col gap-2">
-            <label htmlFor="progressStatus">Progress Status</label>
+            <label className="text-gray-500 font-semibold" htmlFor="progressStatus">Progress Status</label>
             <select
               className="rounded border p-1 w-full outline-none text-black"
               name="progressStatus"
@@ -364,7 +356,7 @@ const TaskForm: React.FC = () => {
             ) : null}
           </div>
           <div>
-            <label htmlFor="priority">Task Priority</label>
+            <label className="text-gray-500 font-semibold" htmlFor="priority">Task Priority</label>
             <select
               className="rounded border p-1 w-full outline-none text-black"
               name="priority"

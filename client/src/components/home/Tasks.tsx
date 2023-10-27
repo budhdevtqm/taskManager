@@ -1,11 +1,48 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { getTasks } from "redux/taskSlice";
 import { useAppDispatch, useAppSelector } from "redux/hooks";
 import { verifyStatus, makeTitlePerfect, priorityClass } from "common/utils";
 import Footer from "components/layout/Footer";
+import Filter from "./Filter";
+
+export interface FilterTypes {
+  text?: string;
+  type?: string;
+}
+
+interface CreatedBy {
+  name: string;
+  id: string;
+}
+
+interface AssignUser {
+  label: string;
+  value: string;
+  _id: string;
+}
+
+interface Task {
+  createdBy: CreatedBy;
+  _id: string;
+  title: string;
+  project: string;
+  assignTo: Array<AssignUser>;
+  dueDate: number;
+  type: string;
+  progressStatus: string;
+  priority: string;
+  createdAt: number;
+  updatedAt: number;
+  status: boolean;
+  __v: number;
+}
 
 const Tasks: React.FC = () => {
+  const [filter, setFilter] = useState<FilterTypes>({ text: "", type: "" });
+  const [filtered, setFiltered] = useState<Task[] | []>([]);
+  const [error, setError] = useState<string>("");
+
   const navigate = useNavigate();
   const dispatch = useAppDispatch();
 
@@ -17,18 +54,63 @@ const Tasks: React.FC = () => {
       verifyStatus(resp.payload.status, navigate);
       return;
     }
+
+    setFiltered(resp.payload.data.data);
   };
-  console.log("tasks", tasks);
+
+  const filterHandler = (values: FilterTypes, tasks: Task[]) => {
+    const { text, type } = values;
+
+    if (text?.trim() === "" && type === "") {
+      setFiltered(tasks);
+      return;
+    }
+
+    if (text?.trim() !== "" && type?.trim() !== "") {
+      const byText = tasks.filter((task: any) =>
+        task.title.toLowerCase().includes(text?.trim().toLowerCase())
+      );
+
+      const result = byText.filter((task: any) => task.type === type);
+      setFiltered(result);
+      return;
+    }
+
+    if (text?.trim() !== "" && type === "") {
+      const result =
+        tasks &&
+        tasks.filter((task: any) =>
+          task.title.toLowerCase().includes(text?.trim().toLowerCase())
+        );
+      setFiltered(result);
+      return;
+    }
+
+    if (type !== "" && text?.trim() === "") {
+      const result = tasks && tasks.filter((task: any) => task.type === type);
+      setFiltered(result);
+      return;
+    }
+  };
 
   useEffect(() => {
     getMyTasks();
   }, []);
+
+  useEffect(() => {
+    if (tasks.length > 0) {
+      filterHandler(filter, tasks);
+    }
+  }, [filter.text, filter.type]);
 
   return (
     <>
       <div className="min-h-full">
         <div className="flex justify-between items-center px-8 py-4">
           <h1 className="font-bold text-primary text-[24px]">Tasks</h1>
+
+          <Filter filter={filter} set={setFilter} />
+
           {localStorage.getItem("role") !== "user" && (
             <button
               className="flex border border-primary items-center gap-3 hover:bg-primary px-4 py-1 hover:text-white rounded text-primary border:primary bg-white"
@@ -39,19 +121,20 @@ const Tasks: React.FC = () => {
             </button>
           )}
         </div>
-        {/*  */}
+
+        {filtered.length === 0 && (
+          <div className="w-full h-[100%] flex items-center justify-center">
+            <h1 className="font-bold text-[34px] my-8"> No Task Found!</h1>
+          </div>
+        )}
         <div className="grid grid-cols-3 gap-4 w-[90%] my-8 mx-auto">
-          {tasks.length === 0 && (
-            <div className="w-full h-full flex items-center justify-center font-bold text-[34px]">
-              No Task Found!
-            </div>
-          )}
-          {tasks.length !== 0 &&
-            tasks.map((task: any) => (
+          {filtered.length !== 0 &&
+            filtered.map((task: any) => (
               <div
                 key={task._id}
                 className={`flex flex-col bg-white rounded-lg shadow-lg  ${priorityClass(
-                  task.priority
+                  task.priority,
+                  "border"
                 )}`}
               >
                 <div className="flex items-center mt-2">
@@ -75,64 +158,3 @@ const Tasks: React.FC = () => {
 };
 
 export default Tasks;
-
-/*
-
-
-<div className="flex py-4 px-8 items-center justify-between">
-        <h4 className="font-bold text-gray-500 italic">Filter</h4>
-        <form className="flex items-center justify-evenly gap-8">
-          <div>
-            <input
-              className="text-black p-1 outline-primary"
-              type="text"
-              name="title"
-              id="title"
-              placeholder="search text"
-            />
-          </div>
-          <div>
-            <select
-              className="text-black p-[7px] min-w-[150px] outline-primary"
-              name="assignTo"
-            >
-              <option className="italic bg-gray-500" value="">
-                Assign To
-              </option>
-              {users.map((user) => (
-                <option key={user.id}>{user.name}</option>
-              ))}
-            </select>
-          </div>
-          <div>
-            <select
-              name="priority"
-              className="text-black p-[7px] min-w-[150px] outline-primary"
-            >
-              <option className="italic bg-gray-500" value="">
-                Status
-              </option>
-              {priority.map((p, index) => (
-                <option key={index}>{p}</option>
-              ))}
-            </select>
-          </div>
-          <div className="flex gap-8">
-            <button
-              className="outline-white px-4 py-2 bg-primary text-white rounded hover:bg-white hover:text-primary hover:border-primary"
-              type="button"
-            >
-              Search
-            </button>
-            <button
-              className="outline-white px-4 py-2 bg-primary text-white rounded hover:bg-white hover:text-primary hover:border-primary"
-              type="button"
-            >
-              Reset
-            </button>
-          </div>
-        </form>
-      </div>
-
-
-*/

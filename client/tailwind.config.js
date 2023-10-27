@@ -13,6 +13,7 @@ module.exports = {
         error: "#2f2d2d",
         errorWhite: "#ffffff",
         layoutHeader: "#f4d35e",
+        fadePrimary: "#468282",
       },
       gridTemplateRows: {
         7: "repeat(7, minmax(0, 1fr))",

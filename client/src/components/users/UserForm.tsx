@@ -160,7 +160,7 @@ const UserForm: React.FC = () => {
       <div className="flex flex-col w-[50%] mx-auto my-8  p-8 bg-white rounded-lg shadow ">
         <form className="flex gap-4 flex-col mb-8" onSubmit={submitHandler}>
           <div className="flex flex-col gap-2">
-            <label htmlFor="name">Name</label>
+            <label className="text-gray-500 font-semibold" htmlFor="name">Name</label>
             <input
               type="text"
               name="name"
@@ -174,7 +174,7 @@ const UserForm: React.FC = () => {
             )}
           </div>
           <div className="flex flex-col gap-2">
-            <label htmlFor="email">Email</label>
+            <label className="text-gray-500 font-semibold" htmlFor="email">Email</label>
             <input
               type="text"
               name="email"
@@ -189,7 +189,7 @@ const UserForm: React.FC = () => {
             )}
           </div>
           <div className="flex flex-col gap-2">
-            <label htmlFor="password">Password</label>
+            <label className="text-gray-500 font-semibold" htmlFor="password">Password</label>
             <input
               type="password"
               name="password"
@@ -203,7 +203,7 @@ const UserForm: React.FC = () => {
             )}
           </div>
           <div className="flex flex-col gap-2">
-            <label htmlFor="role">Role</label>
+            <label className="text-gray-500 font-semibold" htmlFor="role">Role</label>
             <select
               className="rounded border p-1 w-full outline-none text-black"
               name="role"

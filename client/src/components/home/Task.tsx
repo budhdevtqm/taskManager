@@ -1,67 +1,18 @@
 import React, { useEffect, useState } from "react";
-import { getDate, verifyStatus } from "common/utils";
+import { getDate, priorityClass, verifyStatus } from "common/utils";
 import { useNavigate, useParams } from "react-router-dom";
 import { useAppDispatch, useAppSelector } from "redux/hooks";
-import { deleteTask, getTask, TaskValues, updateStatus } from "redux/taskSlice";
+import { deleteTask, getTask, TaskValues } from "redux/taskSlice";
 import { Toaster, toast } from "react-hot-toast";
 import Footer from "components/layout/Footer";
 import { BsPencil, BsTrash } from "react-icons/bs";
-
-interface ErrorValues {
-  progressStatus?: String;
-}
-
-const progressStatus = (status: string) => {
-  if (status === "pending") {
-    return (
-      <span className="text-[14px] py-1 text-white rounded-xl px-4 bg-gray-500">
-        Pending
-      </span>
-    );
-  } else if (status === "in progress") {
-    return (
-      <span className="text-[14px] py-1 text-white rounded-xl px-4 bg-orange-700">
-        In Progress
-      </span>
-    );
-  } else if (status === "done") {
-    return (
-      <span className="text-[14px] py-1 text-white rounded-xl px-4 bg-green-500">
-        Done
-      </span>
-    );
-  } else {
-    return (
-      <span className="text-[14px] py-1 text-white rounded-xl px-4 bg-lightBlack">
-        N/A
-      </span>
-    );
-  }
-};
-
-const isOperational = () => {
-  const role = localStorage.getItem("role");
-  if (role) {
-    return role !== "user" && true;
-  }
-  return false;
-};
-
-const validate = (values: { progressStatus: String }) => {
-  const errors: ErrorValues = {};
-  const { progressStatus } = values;
-  if (!progressStatus || progressStatus.trim() === "") {
-    errors.progressStatus = "Required!";
-  }
-  return errors;
-};
+import TaskStatusForm from "./TaskStatusForm";
 
 const Task: React.FC = () => {
   const navigate = useNavigate();
   const dispatch = useAppDispatch();
+  const userRole = localStorage.getItem("role");
   const taskId = useParams().id as String;
-  const [formValues, setFormValues] = useState({ progressStatus: "" });
-  const [errors, setErrors] = useState<ErrorValues>({});
 
   const task = useAppSelector((state) => state.tasks.task) as TaskValues;
 
@@ -69,32 +20,6 @@ const Task: React.FC = () => {
     const response: any = await dispatch(getTask(id));
     if (response.type === "/get-task/rejected") {
       verifyStatus(response.payload.status, navigate);
-      return;
-    }
-  };
-
-  const changeHandler = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    const { value, name } = e.target;
-    setFormValues({ ...formValues, [name]: value });
-  };
-
-  const updateHandler = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-
-    setErrors({});
-    const validationResults = validate(formValues);
-    if (Object.keys(validationResults).length > 0) {
-      setErrors(validationResults);
-      return;
-    }
-
-    const response: any = await dispatch(
-      updateStatus({ id: taskId, ...formValues })
-    );
-
-    if (response.type === "/update-status/fulfilled") {
-      toast.success(response.payload.data.message, { position: "top-right" });
-      getTask(taskId);
       return;
     }
   };
@@ -108,10 +33,6 @@ const Task: React.FC = () => {
     }
     verifyStatus(response.payload.status, navigate);
   };
-
-  const userNames =
-    task &&
-    task.assignTo.map((user: { label: String; values: String }) => user.label);
 
   useEffect(() => {
     if (taskId) {
@@ -132,60 +53,94 @@ const Task: React.FC = () => {
               {getDate(task?.dueDate)}
             </span>
           </div>
-          <div className="grid">
-            <div className=""></div>
-            <div></div>
+          <div className="grid w-[90%] mx-auto">
+            <div className="bg-white  p-8 rounded-xl shadow-xl mb-6">
+              <p className="text-gray-800">{task.title}</p>
+            </div>
+            <div className="bg-white p-4 rounded-xl shadow-xl  mb-6">
+              <div className="grid grid-cols-4 gap-2 ">
+                <div
+                  className="border-2 text-center p-3 rounded-xl"
+                  title="Priority"
+                >
+                  <p
+                    className={`${priorityClass(
+                      task.priority,
+                      "color"
+                    )} font-semibold capitalize`}
+                  >
+                    {task.priority}
+                  </p>
+                </div>
+                <div
+                  className="border-2 text-center p-3 rounded-xl"
+                  title="Progress"
+                >
+                  <p className="font-semibold capitalize">
+                    {task.progressStatus}
+                  </p>
+                </div>
+                <div
+                  className="border-2 text-center p-3 rounded-xl"
+                  title="Type"
+                >
+                  <p className="font-semibold capitalize text-primary">
+                    {task.type}
+                  </p>
+                </div>
+                <div
+                  className="border-2 text-center p-3 rounded-xl"
+                  title="Assigned By"
+                >
+                  <p className="font-semibold text-green-600">
+                    {task.createdBy.name}
+                  </p>
+                </div>
+              </div>
+              <div className="grid gird-rows-2 my-4">
+                <h5 className="text-gray-400 text-center font-bold ">
+                  ASSIGNED TO
+                </h5>
+                <div className="grid grid-cols-3 gap-3 my-4">
+                  {task.assignTo.map(
+                    (user: { label: string; value: string }, index) => (
+                      <p
+                        key={index}
+                        className="text-center p-2 bg-primary rounded text-white font-medium shadow-xl"
+                      >
+                        {user.label}
+                      </p>
+                    )
+                  )}
+                </div>
+              </div>
+              {userRole && (
+                <div>
+                  {userRole === "admin" ||
+                    (userRole === "superAdmin" && (
+                      <div className="flex items-center justify-end">
+                        <span className="px-4 py-2  flex gap-4 cursor-pointer">
+                          <BsPencil
+                            onClick={() =>
+                              navigate(`/home/task/update/${taskId}`)
+                            }
+                            className=" cursor-pointer"
+                            title="Edit"
+                          />
+                          <BsTrash
+                            onClick={() => deleteHandler(taskId)}
+                            className=" cursor-pointer"
+                            title="Delete"
+                          />
+                        </span>
+                      </div>
+                    ))}
+
+                  {userRole === "user" && <TaskStatusForm />}
+                </div>
+              )}
+            </div>
           </div>
-          {/* <div className="px-8 py-4">
-            <div className="bg-white py-2 px-8">
-              <h6 className="text-center my-2 underline">Discription</h6>
-              <p
-                className="text-wrap text-[15px] font-light text-center break-all rounded bg-secondary p-2 "
-                title="Task Info"
-              >
-                {task.title}
-              </p>
-            </div>
-            <div className="flex items-center justify-center my-4 gap-8">
-              <div className="flex items-center flex-col bg-white w-[200px] p-3 hover:rounded-xl justify-center gap-4 hover:shadow-xl">
-                <span className="text-gray-500   ">Status</span>
-                {progressStatus(task?.progressStatus)}
-              </div>
-              <div className="flex items-center flex-col bg-white w-[200px] p-3 hover:rounded-xl justify-center gap-4 hover:shadow-xl">
-                <span className="text-gray-500">AssignTo</span>
-                <span className="flex flex-wrap gap-3">
-                  {userNames.map((name, index) => (
-                    <span
-                      key={index}
-                      className="text-[14px] py-1 text-white rounded-xl px-4 bg-lightBlack"
-                    >
-                      {name}
-                    </span>
-                  ))}
-                </span>
-              </div>
-
-              <div className="flex items-center flex-col bg-white w-[200px] p-3  justify-center gap-4 hover:rounded-xl hover:shadow-xl">
-                <span className="text-gray-500">Task Of</span>
-                <span className="text-[14px] py-1 text-white rounded-xl px-4 bg-lightBlack">
-                  {task.type}
-                </span>
-              </div>
-            </div>
-          </div> */}
-          {/* {isOperational() && (
-            <div className="flex items-center gap-4 justify-end px-8">
-              <BsPencil
-                onClick={() => navigate(`/home/task/update/${taskId}`)}
-                className=" cursor-pointer"
-              />
-              <BsTrash
-                onClick={() => deleteHandler(taskId)}
-                className=" cursor-pointer"
-              />
-            </div>
-          )} */}
-
           <Toaster />
         </div>
       )}
@@ -195,56 +150,3 @@ const Task: React.FC = () => {
 };
 
 export default Task;
-
-/* {localStorage.getItem("role") === "user" && ( */
-
-/* <div className="flex items-center justify-center my-8">
-            <form
-              className="p-8 bg-white rounded shadow-xl w-[40%]"
-              onSubmit={updateHandler}
-            >
-              <div className="flex flex-col">
-                <label
-                  className="mb-3  font-bold text-gray-500"
-                  htmlFor="progressStatus"
-                >
-                  Update Status
-                </label>
-                <select
-                  name="progressStatus"
-                  id="progressStatus"
-                  className="border-2 rounded p-1"
-                  onChange={changeHandler}
-                  value={formValues.progressStatus}
-                >
-                  <option
-                    className="italic"
-                    disabled
-                    value={task.progressStatus}
-                  >
-                    {task.progressStatus.toUpperCase()}
-                  </option>
-                  {status.map((s, index) => (
-                    <option key={index} value={s}>
-                      {s.toUpperCase()}
-                    </option>
-                  ))}
-                </select>
-                {errors.progressStatus && (
-                  <p className="text-red-500 text-[13px]">
-                    {errors.progressStatus}
-                  </p>
-                )}
-              </div>
-              <div className="flex items-center justify-center mt-4">
-                <button
-                  className="rounded-lg px-4 py-2 bg-green-700 text-green-100 hover:bg-green-800 duration-300"
-                  type="submit"
-                >
-                  Update
-                </button>
-              </div>
-            </form>
-          </div> */
-
-/* )} */

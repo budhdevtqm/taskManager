@@ -56,12 +56,24 @@ export const makeTitlePerfect = (text) => {
   return text.substring(0, 150) + "...";
 };
 
-export const priorityClass = (priority) => {
-  if (priority === "low") {
-    return "border border-green-500 ";
-  } else if (priority === "medium") {
-    return "border border-yellow-500";
-  } else {
-    return "border border-red-500";
+export const priorityClass = (priority, type) => {
+  if (type === "border") {
+    if (priority === "low") {
+      return "border border-green-500 ";
+    } else if (priority === "medium") {
+      return "border border-yellow-500";
+    } else {
+      return "border border-red-500";
+    }
+  }
+
+  if (type === "color") {
+    if (priority === "low") {
+      return "text-green-500 ";
+    } else if (priority === "medium") {
+      return "text-yellow-500";
+    } else {
+      return "text-red-500";
+    }
   }
 };

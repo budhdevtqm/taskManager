@@ -165,7 +165,7 @@ const ProjectForm: React.FC = () => {
       <div className="flex flex-col w-[50%] mx-auto  h-fit p-8 bg-white rounded-lg shadow">
         <form className="h-fit flex gap-2 flex-col" onSubmit={submitHandler}>
           <div className="flex flex-col gap-2">
-            <label htmlFor="name">Project Name</label>
+            <label className="text-gray-500 font-semibold" htmlFor="name">Project Name</label>
             <input
               type="text"
               name="name"
@@ -179,7 +179,7 @@ const ProjectForm: React.FC = () => {
             )}
           </div>
           <div className="flex flex-col gap-2">
-            <label htmlFor="members">Select Members</label>
+            <label className="text-gray-500 font-semibold" htmlFor="members">Select Members</label>
             <MultiSelect
               options={users}
               value={members}
@@ -191,7 +191,7 @@ const ProjectForm: React.FC = () => {
             )}
           </div>
           <div className="flex flex-col gap-2">
-            <label htmlFor="dueDate">Due Date</label>
+            <label className="text-gray-500 font-semibold" htmlFor="dueDate">Due Date</label>
             <input
               type="date"
               name="dueDate"
@@ -205,7 +205,7 @@ const ProjectForm: React.FC = () => {
             )}
           </div>
           <div className="flex flex-col gap-2">
-            <label htmlFor="description">Description</label>
+            <label className="text-gray-500 font-semibold" htmlFor="description">Description</label>
             <textarea
               name="description"
               id="description"

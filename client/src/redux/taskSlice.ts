@@ -152,10 +152,10 @@ export const updateStatus = createAsyncThunk(
     { rejectWithValue }
   ) => {
     try {
-      const { id, progressStatus } = values;
+      const { id } = values;
       const response = await axios.patch(
         `${baseURL}/task/update-status/${id}`,
-        { progressStatus },
+        values,
         headerConfig
       );
       return response;

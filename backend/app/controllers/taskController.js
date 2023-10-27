@@ -47,11 +47,9 @@ module.exports.deleteTask = async (req, res) => {
 
 module.exports.updateStatus = async (req, res) => {
   try {
-    const response = await model.updateStatus(req.body);
+    const response = await model.updateStatus(req);
     res.status(response.status).json(response);
   } catch (error) {
     res.status(error.status).json(error);
   }
 };
-
-

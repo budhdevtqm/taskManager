@@ -144,12 +144,9 @@ module.exports.delete = async (taskId) => {
 module.exports.updateStatus = async (req) => {
   return new Promise(async (resolve, reject) => {
     try {
-      console.log("body", req.body);
-      const task = await taskSchema.findOne({ _id: req.params.id });
-      await taskSchema.findOneAndUpdate(
+      const update = await taskSchema.updateOne(
         { _id: req.params.id },
         {
-          ...task,
           updatedAt: new Date().getTime(),
           progressStatus: req.body.progressStatus,
         }
