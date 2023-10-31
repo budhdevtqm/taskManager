@@ -20,6 +20,7 @@ export interface ProfileValues {
   name: string;
   password: string;
   role: string;
+  image?: string;
 }
 
 interface UserState {

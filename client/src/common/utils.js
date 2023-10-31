@@ -77,3 +77,11 @@ export const priorityClass = (priority, type) => {
     }
   }
 };
+
+export const userImage = (url) => {
+  if (url) {
+    return `${baseURL}/images/users/${url}`;
+  } else {
+    return "/images/user.png";
+  }
+};

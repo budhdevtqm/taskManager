@@ -1,20 +1,31 @@
-import { verifyStatus } from "common/utils";
-import UploadImage from "components/common/UploadImage";
 import React, { useEffect, useState } from "react";
+import { baseURL, headerConfig, userImage, verifyStatus } from "common/utils";
 import { toast } from "react-hot-toast";
 import { useNavigate } from "react-router-dom";
 import { useAppDispatch } from "redux/hooks";
 import { getProfile, updateProfile } from "redux/userSlice";
+import axios from "axios";
 
 interface Values {
   name: string;
   email: string;
   password: string;
+  image: string;
 }
 
 interface ErrorValues {
   name?: string;
   password?: string;
+  image?: string;
+}
+
+interface File {
+  lastModified?: number;
+  lastModifiedDate?: string;
+  name?: string;
+  size?: number;
+  type?: string;
+  webkitRelativePath?: string;
 }
 
 const UpdateForm = () => {
@@ -22,12 +33,13 @@ const UpdateForm = () => {
     name: "",
     email: "",
     password: "",
+    image: "",
   });
 
   const navigate = useNavigate();
   const dispatch = useAppDispatch();
   const [errors, setErrors] = useState<ErrorValues>({});
-  const [file, setFile] = useState<any>("");
+  const [file, setFile] = useState<any>({});
 
   const validate = (values: Values) => {
     let errors: ErrorValues = {};
@@ -80,17 +92,39 @@ const UpdateForm = () => {
       verifyStatus(response.payload.status, navigate);
       return;
     }
-    const { name, email, password } = response.payload.data.data;
+    const { name, email, password, image } = response.payload.data.data;
+
     setFormValues({
       name,
       email,
       password,
+      image: image ?? "",
     });
+  };
+
+  const uploadImage = async (file: any) => {
+    const formData = new FormData();
+    formData.append("image", file);
+    const response = await axios.post(
+      baseURL + "/user/upload-image/profile",
+      formData,
+      headerConfig
+    );
+    if (response.status === 200) {
+      fetchPorfileData();
+    }
   };
 
   useEffect(() => {
     fetchPorfileData();
   }, []);
+
+  useEffect(() => {
+    if (file.name) {
+      uploadImage(file);
+      setFile({});
+    }
+  }, [file]);
 
   return (
     <div className="w-[60%] mx-auto bg-white p-10 rounded-lg font-normal border-2 border-rounded">
@@ -101,14 +135,46 @@ const UpdateForm = () => {
         onSubmit={submitHandler}
       >
         <div className="flex flex-col gap-2">
-          {/* <UploadImage multiple={false} accept="" /> */}
-          {/* {errors.image && (
-            <p className="text-[13px] text-red-500">{errors.image}</p>
-          )} */}
+          <div className="flex flex-col  gap-4  bg-grey-lighter">
+            <div className="flex items-center justify-between p-3">
+              <div className="p-4">
+                <img
+                  className=" border-2 border-primary w-[150px]"
+                  src={userImage(formValues.image)}
+                  alt="user-img"
+                  onClick={() =>
+                    window.open(userImage(formValues.image), "_blank")
+                  }
+                />
+              </div>
+              <label className=" flex flex-col items-center justify-center px-4 py-6  bg-white text-primary rounded-lg shadow-lg tracking-wide  border border-blue cursor-pointer hover:bg-teal-500 hover:text-white">
+                <svg
+                  className="w-8 h-8"
+                  fill="currentColor"
+                  xmlns="http://www.w3.org/2000/svg"
+                  viewBox="0 0 20 20"
+                >
+                  <path d="M16.88 9.1A4 4 0 0 1 16 17H5a5 5 0 0 1-1-9.9V7a3 3 0 0 1 4.52-2.59A4.98 4.98 0 0 1 17 8c0 .38-.04.74-.12 1.1zM11 11h3l-4-4-4 4h3v3h2v-3z" />
+                </svg>
+                <span className="mt-2 text-base leading-normal">
+                  Change Picture
+                </span>
+                <input
+                  type="file"
+                  className="hidden"
+                  accept="image/*"
+                  name="image"
+                  onChange={(e: any) => setFile(e.target.files[0])}
+                />
+              </label>
+            </div>
+          </div>
         </div>
 
         <div className="flex flex-col gap-2">
-          <label className="text-gray-500 font-semibold" htmlFor="name">User Name</label>
+          <label className="text-gray-500 font-semibold" htmlFor="name">
+            User Name
+          </label>
           <input
             type="text"
             id="name"
@@ -122,7 +188,9 @@ const UpdateForm = () => {
           )}
         </div>
         <div className="flex flex-col gap-2">
-          <label className="text-gray-500 font-semibold" htmlFor="email">Email</label>
+          <label className="text-gray-500 font-semibold" htmlFor="email">
+            Email
+          </label>
           <input
             type="text"
             name="email"
@@ -133,7 +201,9 @@ const UpdateForm = () => {
           />
         </div>
         <div className="flex flex-col gap-2">
-          <label className="text-gray-500 font-semibold" htmlFor="password">Password</label>
+          <label className="text-gray-500 font-semibold" htmlFor="password">
+            Password
+          </label>
           <input
             type="password"
             name="password"

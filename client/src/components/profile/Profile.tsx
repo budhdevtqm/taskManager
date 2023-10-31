@@ -6,7 +6,7 @@ import { ProfileValues, getProfile } from "redux/userSlice";
 import { verifyStatus } from "common/utils";
 import { useNavigate } from "react-router-dom";
 
-const Profile = () => {
+const Profile: React.FC = () => {
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
 

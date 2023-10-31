@@ -387,6 +387,7 @@ module.exports.getProfile = async (values) => {
           name: user.name,
           email: user.email,
           role: user.role,
+          image: user.image,
           password: "",
         },
         status: 200,
@@ -430,10 +431,21 @@ module.exports.updateProfile = async (values) => {
 module.exports.upload = async (req) => {
   return new Promise(async (resolve, reject) => {
     try {
-      const file = req.file;
-      console.log(file, "file");
+      console.log("body", req.body);
+      console.log("file", req.file);
+      await userSchema.updateOne(
+        {
+          _id: req.body.userId,
+        },
+        { image: req.file.filename }
+      );
+      resolve({
+        ok: true,
+        status: 200,
+        message: "Picture updated successfully.",
+      });
     } catch (error) {
-      reject({ ...error });
+      reject({ ok: false, message: "Something went wrong!", status: 400 });
     }
   });
 };

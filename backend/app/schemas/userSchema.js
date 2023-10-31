@@ -13,6 +13,7 @@ const userSchema = new mongoose.Schema(
     otp: Number,
     otpExpireAt: Number,
     otpCreatedAt: Number,
+    image: { type: String, required: false },
   },
   {
     collection: "users",

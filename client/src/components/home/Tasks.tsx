@@ -5,6 +5,7 @@ import { useAppDispatch, useAppSelector } from "redux/hooks";
 import { verifyStatus, makeTitlePerfect, priorityClass } from "common/utils";
 import Footer from "components/layout/Footer";
 import Filter from "./Filter";
+import { useLocation } from "react-router-dom";
 
 export interface FilterTypes {
   text?: string;
@@ -41,7 +42,6 @@ interface Task {
 const Tasks: React.FC = () => {
   const [filter, setFilter] = useState<FilterTypes>({ text: "", type: "" });
   const [filtered, setFiltered] = useState<Task[] | []>([]);
-  const [error, setError] = useState<string>("");
 
   const navigate = useNavigate();
   const dispatch = useAppDispatch();

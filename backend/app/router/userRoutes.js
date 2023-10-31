@@ -2,9 +2,17 @@ const express = require("express");
 const router = express.Router();
 const { signupValidation } = require("../validations/userValidation");
 const controller = require("../controllers/userControllers");
-const { auth, authSuperAdmin } = require("../middlewares/accessMiddlewares");
+const {
+  auth,
+  authSuperAdmin,
+  authAndUploadProfilePic,
+} = require("../middlewares/accessMiddlewares");
 
-router.post("/upload-image/profile", [auth], controller.uploadImage)
+router.post(
+  "/upload-image/profile",
+  authAndUploadProfilePic,
+  controller.uploadImage
+);
 router.patch("/update/my/profile", [auth], controller.updateMyProfile);
 router.get("/my/profile", [auth], controller.getMyProfile);
 router.get("/get/users", [auth], controller.allUser);

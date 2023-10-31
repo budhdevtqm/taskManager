@@ -111,8 +111,8 @@ module.exports.updateMyProfile = async (req, res) => {
 module.exports.uploadImage = async (req, res) => {
   try {
     const response = await model.upload(req);
-    console.log("response", response);
+    res.status(response.status).json(response);
   } catch (error) {
-    console.log("error", error);
+    res.status(error.status).json(error);
   }
 };
