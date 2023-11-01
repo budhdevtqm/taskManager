@@ -76,3 +76,41 @@ module.exports.authAndUploadProfilePic = async (req, res, next) => {
     res.status(401).json({ ok: false, message: "Invalid Token", status: 401 });
   }
 };
+
+// const taskFileStorage = multer.diskStorage({
+//   destination: (req, file, cb) => {
+//     cb(null, "public/images/tasks"); // Save uploaded files to the 'uploads' directory
+//   },
+//   filename: (req, file, cb) => {
+//     console.log("file,", file);
+//     cb(null, Date.now() + "-" + file.originalname); // Rename the file to avoid naming conflicts
+//   },
+// });
+
+const taskFileStorage = multer({ dest: "public/images/tasks" });
+
+module.exports.uploadMulitpleMiddleware = async (req, res, next) => {
+  const authHeader = req.headers["authorization"];
+  const token = authHeader && authHeader.split(" ")[1];
+  if (token == null || token == undefined) {
+    return res.status(401).json({ ok: false, message: "Invalid Token" });
+  }
+
+  try {
+    const verify = await jwt.verify(token, process.env.JWT_PRIVATE);
+    const { role, userId } = verify;
+
+    taskFileStorage.array("files", 5)(req, res, (er) => {
+      if (er) {
+        console.log("erd", er);
+        next(er);
+      }
+      req.body.role = role;
+      req.body.userId = userId;
+      next();
+    });
+  } catch (error) {
+    console.log("error", error);
+    res.status(401).json({ ok: false, message: "Invalid Token", status: 401 });
+  }
+};

@@ -8,7 +8,6 @@ module.exports.create = async (values) => {
       project,
       members,
       dueDate,
-      progressStatus,
       priority,
       userId,
       type,
@@ -17,12 +16,12 @@ module.exports.create = async (values) => {
     const user = await userSchema.findOne({ _id: userId });
 
     try {
-      await new taskSchema({
+      const added = await new taskSchema({
         title,
         project,
         assignTo: members,
         dueDate: new Date(dueDate).getTime(),
-        progressStatus,
+        progressStatus: "pending",
         priority,
         status: true,
         createdBy: { name: user.name, id: userId },
@@ -30,7 +29,12 @@ module.exports.create = async (values) => {
         createdAt: new Date().getTime(),
         type,
       }).save();
-      resolve({ status: 201, ok: true, message: "Task created Successfully" });
+      resolve({
+        status: 201,
+        ok: true,
+        message: "Task created Successfully",
+        id: added._id.toString(),
+      });
     } catch (er) {
       console.log("er", er);
       reject({ ok: false, status: 400, message: "Something went wrong!" });
@@ -158,6 +162,17 @@ module.exports.updateStatus = async (req) => {
         message: "something went wrong",
         status: 400,
       });
+    }
+  });
+};
+
+module.exports.addFiles = async (req) => {
+  return new Promise(async (resolve, reject) => {
+    try {
+      console.log("body", req.body);
+      console.log("files", req.file);
+    } catch (error) {
+      reject({ ok: false, status: 400, message: "Something went wrong!" });
     }
   });
 };

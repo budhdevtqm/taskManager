@@ -53,3 +53,13 @@ module.exports.updateStatus = async (req, res) => {
     res.status(error.status).json(error);
   }
 };
+
+module.exports.addFiles = async (req, res) => {
+  try {
+    const response = await model.addFiles(req);
+    console.log("response", response);
+  } catch (error) {
+    console.log("er", error);
+    res.status(error.status).json(error);
+  }
+};

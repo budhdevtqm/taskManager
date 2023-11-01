@@ -1,7 +1,16 @@
 const controller = require("../controllers/taskController");
 const router = require("express").Router();
-const { auth, authAdmins } = require("../middlewares/accessMiddlewares");
+const {
+  auth,
+  authAdmins,
+  uploadMulitpleMiddleware,
+} = require("../middlewares/accessMiddlewares");
 
+router.post(
+  "/add/files/:taskId",
+  [uploadMulitpleMiddleware],
+  controller.addFiles
+);
 router.get("/get/all", [auth], controller.getAll);
 router.patch("/update-status/:id", [auth], controller.updateStatus);
 router.get("/:id", [auth], controller.getTask);
