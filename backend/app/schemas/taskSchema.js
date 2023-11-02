@@ -22,6 +22,7 @@ const schema = new mongoose.Schema(
       default: "low",
     },
     createdBy: { name: String, id: String },
+    taskPay: String,
     createdAt: Number,
     updatedAt: Number,
     status: Boolean,

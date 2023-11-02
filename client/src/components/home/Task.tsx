@@ -1,5 +1,11 @@
 import React, { useEffect, useState } from "react";
-import { getDate, priorityClass, verifyStatus } from "common/utils";
+import {
+  baseURL,
+  getDate,
+  headerConfig,
+  priorityClass,
+  verifyStatus,
+} from "common/utils";
 import { useNavigate, useParams } from "react-router-dom";
 import { useAppDispatch, useAppSelector } from "redux/hooks";
 import { deleteTask, getTask, TaskValues } from "redux/taskSlice";
@@ -7,12 +13,61 @@ import { Toaster, toast } from "react-hot-toast";
 import Footer from "components/layout/Footer";
 import { BsPencil, BsTrash } from "react-icons/bs";
 import TaskStatusForm from "./TaskStatusForm";
+import axios from "axios";
+import {
+  BsFiletypePdf,
+  BsFiletypeDoc,
+  BsFiletypeDocx,
+  BsFiletypeXls,
+  BsFiletypeTxt,
+} from "react-icons/bs";
+
+interface uploadedFile {
+  createdAt: number;
+  createdBy: string;
+  filename: string;
+  status: boolean;
+  taskId: string;
+  updatedAt: number;
+  __v: number;
+  _id: string;
+}
+
+const iconStyle = "text-[60px] text-primary";
+
+const renderFileIcon = (filename: string) => {
+  const ext = filename.split(".")[filename.split(".").length - 1];
+  if (ext === "xls") {
+    return <BsFiletypeXls className={iconStyle} />;
+  }
+
+  if (ext === "doc") {
+    return <BsFiletypeDoc className={iconStyle} />;
+  }
+
+  if (ext === "docx") {
+    return <BsFiletypeDocx className={iconStyle} />;
+  }
+
+  if (ext === "pdf") {
+    return <BsFiletypePdf className={iconStyle} />;
+  }
+
+  if (ext === "txt") {
+    return <BsFiletypeTxt className={iconStyle} />;
+  }
+};
+
+const openTab = (filename: string) => {
+  return baseURL + "/images/tasks/" + filename;
+};
 
 const Task: React.FC = () => {
+  const [uploadedFiles, setUploadedFiles] = useState<uploadedFile[] | []>([]);
   const navigate = useNavigate();
   const dispatch = useAppDispatch();
   const userRole = localStorage.getItem("role");
-  const taskId = useParams().id as String;
+  const taskId = useParams().id as string;
 
   const task = useAppSelector((state) => state.tasks.task) as TaskValues;
 
@@ -24,7 +79,7 @@ const Task: React.FC = () => {
     }
   };
 
-  const deleteHandler = async (id: String) => {
+  const deleteHandler = async (id: string) => {
     const response: any = await dispatch(deleteTask(id));
     if (response.type === "/delete-task/fulfilled") {
       toast.success("Deleted.", { position: "top-right" });
@@ -34,9 +89,23 @@ const Task: React.FC = () => {
     verifyStatus(response.payload.status, navigate);
   };
 
+  const fetchFiles = async (taskId: string) => {
+    try {
+      const response = await axios.get(
+        baseURL + "/task/get-files/" + taskId,
+        headerConfig
+      );
+
+      setUploadedFiles(response.data.data);
+    } catch (error: any) {
+      verifyStatus(error?.response?.status, navigate);
+    }
+  };
+
   useEffect(() => {
     if (taskId) {
       getTaskDetails(taskId);
+      fetchFiles(taskId);
     }
   }, []);
 
@@ -114,6 +183,37 @@ const Task: React.FC = () => {
                   )}
                 </div>
               </div>
+              <div className="my-4">
+                <h5 className="text-gray-400 text-center font-bold ">
+                  DOCUMENTS
+                </h5>
+                {uploadedFiles.length > 0 ? (
+                  <div className="grid grid-cols-3 gap-4">
+                    {uploadedFiles.map((file: uploadedFile) => (
+                      <div
+                        title={file.filename}
+                        key={file._id}
+                        className="flex flex-col border-2 rounded-lg py-3 shadow-xl"
+                        onClick={() =>
+                          window.open(openTab(file.filename), "_blank")
+                        }
+                      >
+                        <div className="flex items-center justify-end"></div>
+                        <div className="flex items-center justify-center">
+                          {renderFileIcon(file.filename)}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="text-center my-4 flex items-center justify-center">
+                    <p className="font-bold  rounded-xl px-2  py-1 bg-yellow-500">
+                      No Files!
+                    </p>
+                  </div>
+                )}
+              </div>
+
               {userRole && (
                 <div>
                   {userRole === "admin" ||

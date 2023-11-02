@@ -77,17 +77,16 @@ module.exports.authAndUploadProfilePic = async (req, res, next) => {
   }
 };
 
-// const taskFileStorage = multer.diskStorage({
-//   destination: (req, file, cb) => {
-//     cb(null, "public/images/tasks"); // Save uploaded files to the 'uploads' directory
-//   },
-//   filename: (req, file, cb) => {
-//     console.log("file,", file);
-//     cb(null, Date.now() + "-" + file.originalname); // Rename the file to avoid naming conflicts
-//   },
-// });
+const mulipleStorage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    cb(null, "public/images/tasks");
+  },
+  filename: (req, file, cb) => {
+    cb(null, Date.now() + "-" + file.originalname);
+  },
+});
 
-const taskFileStorage = multer({ dest: "public/images/tasks" });
+const taskFileStorage = multer({ storage: mulipleStorage });
 
 module.exports.uploadMulitpleMiddleware = async (req, res, next) => {
   const authHeader = req.headers["authorization"];
@@ -102,7 +101,6 @@ module.exports.uploadMulitpleMiddleware = async (req, res, next) => {
 
     taskFileStorage.array("files", 5)(req, res, (er) => {
       if (er) {
-        console.log("erd", er);
         next(er);
       }
       req.body.role = role;
@@ -110,7 +108,6 @@ module.exports.uploadMulitpleMiddleware = async (req, res, next) => {
       next();
     });
   } catch (error) {
-    console.log("error", error);
     res.status(401).json({ ok: false, message: "Invalid Token", status: 401 });
   }
 };

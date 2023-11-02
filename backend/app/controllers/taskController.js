@@ -57,9 +57,26 @@ module.exports.updateStatus = async (req, res) => {
 module.exports.addFiles = async (req, res) => {
   try {
     const response = await model.addFiles(req);
-    console.log("response", response);
+    res.status(response.status).json(response);
   } catch (error) {
-    console.log("er", error);
+    res.status(error.status).json(error);
+  }
+};
+
+module.exports.getTaskFiles = async (req, res) => {
+  try {
+    const response = await model.getFiles(req);
+    res.status(response.status).json(response);
+  } catch (error) {
+    res.status(error.status).json(error);
+  }
+};
+
+module.exports.deleteFile = async (req, res) => {
+  try {
+    const response = await model.deleteFile(req);
+    res.status(response.status).json(response);
+  } catch (error) {
     res.status(error.status).json(error);
   }
 };

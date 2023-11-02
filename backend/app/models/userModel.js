@@ -251,7 +251,7 @@ module.exports.signin = async (values) => {
       }
 
       const token = await jwt.sign({ role, userId }, process.env.JWT_PRIVATE, {
-        expiresIn: "1h",
+        expiresIn: "1m",
       });
 
       resolve({

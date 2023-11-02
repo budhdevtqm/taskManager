@@ -1,5 +1,6 @@
 const taskSchema = require("../schemas/taskSchema");
 const userSchema = require("../schemas/userSchema");
+const fileSchema = require("../schemas/fileSchema");
 
 module.exports.create = async (values) => {
   return new Promise(async (resolve, reject) => {
@@ -11,6 +12,7 @@ module.exports.create = async (values) => {
       priority,
       userId,
       type,
+      taskPay,
     } = values;
 
     const user = await userSchema.findOne({ _id: userId });
@@ -28,6 +30,7 @@ module.exports.create = async (values) => {
         updatedAt: 0,
         createdAt: new Date().getTime(),
         type,
+        taskPay,
       }).save();
       resolve({
         status: 201,
@@ -102,6 +105,7 @@ module.exports.update = async (req) => {
         type,
         dueDate,
         members,
+        taskPay,
       } = values;
 
       await taskSchema.findByIdAndUpdate(
@@ -112,6 +116,7 @@ module.exports.update = async (req) => {
           project,
           title,
           type,
+          taskPay,
           dueDate: new Date(dueDate).getTime(),
           updatedAt: new Date().getTime(),
           assignTo: members,
@@ -169,8 +174,52 @@ module.exports.updateStatus = async (req) => {
 module.exports.addFiles = async (req) => {
   return new Promise(async (resolve, reject) => {
     try {
-      console.log("body", req.body);
-      console.log("files", req.file);
+      const { userId } = req.body;
+      const { taskId } = req.params;
+      const files = req.files;
+
+      await Promise.all(
+        files.map(async (file) => {
+          return new fileSchema({
+            filename: file.filename,
+            createdAt: Date.now(),
+            updatedAt: 0,
+            taskId,
+            status: true,
+            createdBy: userId,
+          }).save();
+        })
+      );
+
+      resolve({
+        ok: true,
+        message: "Files uploaded successfully.",
+        status: 201,
+      });
+    } catch (error) {
+      reject({ ok: false, status: 400, message: "Something went wrong!" });
+    }
+  });
+};
+
+module.exports.getFiles = async (req) => {
+  return new Promise(async (resolve, reject) => {
+    try {
+      const { taskId } = req.params;
+      const files = await fileSchema.find({ taskId });
+      resolve({ ok: true, status: 200, data: files });
+    } catch (error) {
+      reject({ ok: false, status: 400, message: "Something went wrong!" });
+    }
+  });
+};
+
+module.exports.deleteFile = async (req) => {
+  return new Promise(async (resolve, reject) => {
+    try {
+      const { fileId } = req.params;
+      await fileSchema.deleteOne({ _id: fileId });
+      resolve({ ok: true, message: "File Deleted.", status: 200 });
     } catch (error) {
       reject({ ok: false, status: 400, message: "Something went wrong!" });
     }

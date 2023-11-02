@@ -9,13 +9,12 @@ const path = require("path");
 const app = express();
 databaseConnection();
 
-//common middlewares
 app.use(cors({ origin: "*" }));
 
 // body-parsers
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-app.use(express.static(path.join(__dirname,'public')));
+app.use(express.static(path.join(__dirname, "public")));
 
 app.use("/user", userRouter);
 app.use("/project", projectRouter);

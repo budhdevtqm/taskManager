@@ -137,10 +137,11 @@ const Tasks: React.FC = () => {
                   "border"
                 )}`}
               >
-                <div className="flex items-center mt-2">
+                <div className="flex items-center justify-between mt-2">
                   <h3 className="font-bold text-primary px-4 rounded-xl text-m">
                     {task.type}
                   </h3>
+                  <h1 className="font-bold text-gray-600 px-4 rounded-xl text-m">{`$ ${task.taskPay ?? 0}`}</h1>
                 </div>
                 <p
                   onClick={() => navigate(`/home/task/${task._id}`)}
