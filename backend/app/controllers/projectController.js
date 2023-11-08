@@ -10,7 +10,6 @@ module.exports.createProject = async (req, res) => {
 };
 
 module.exports.updateProject = async (req, res) => {
-  console.log("req", req.body);
   try {
     const response = await model.update(req);
     res.status(response.status).json(response);

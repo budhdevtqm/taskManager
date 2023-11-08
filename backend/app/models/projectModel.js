@@ -2,20 +2,15 @@ const projectSchema = require("../schemas/projectSchema");
 const userSchema = require("../schemas/userSchema");
 
 module.exports.create = async (values) => {
-  const { name, description, members, dueDate, userId } = values;
+  const { name, description, dueDate, userId } = values;
   console;
   return new Promise(async (resolve, reject) => {
     try {
-      const team = members.map((user) => ({
-        name: user.label,
-        id: user.value,
-      }));
       const user = await userSchema.findOne({ _id: userId });
 
       await new projectSchema({
         name,
         description,
-        members: team,
         createdBy: { name: user.name, id: userId },
         createdAt: new Date().getTime(),
         updatedAt: 0,
@@ -33,18 +28,18 @@ module.exports.create = async (values) => {
 
 module.exports.update = async (req) => {
   return new Promise(async (resolve, reject) => {
-    const { name, desciption, dueDate, members, projectId } = req.body;
+    const { name, description, dueDate } = req.body;
     try {
-      const response = await projectSchema.findOneAndUpdate(
+      await projectSchema.updateOne(
         { _id: req.params.id },
         {
           name,
-          desciption,
+          description,
           dueDate: new Date(dueDate).getTime(),
-          members,
           updatedAt: new Date().getTime(),
         }
       );
+
       resolve({ ok: true, message: "Updated Successfully.", status: 200 });
     } catch (error) {
       reject({ ok: false, message: "Something went wrong", status: 400 });

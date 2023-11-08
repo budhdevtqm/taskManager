@@ -1,10 +1,9 @@
 import React from "react";
 import Tasks from "./Tasks";
 
-const Dashboard = () => {
+const Dashboard: React.FC = () => {
   return (
     <section className="h-full">
-      {/* All Tasks */}
       <Tasks />
     </section>
   );

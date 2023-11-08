@@ -1,15 +1,7 @@
-import {
-  verifyStatus,
-  types,
-  status,
-  priority,
-  stampToInputDate,
-  baseURL,
-  headerConfig,
-} from "common/utils";
-import Footer from "components/layout/Footer";
 import React, { useEffect, useState } from "react";
-import { Toaster, toast } from "react-hot-toast";
+import { types, status, priority, stampToInputDate } from "common/utils";
+import Footer from "components/layout/Footer";
+import { Toaster } from "react-hot-toast";
 import { MultiSelect } from "react-multi-select-component";
 import { useNavigate, useParams } from "react-router-dom";
 import { AiFillFile } from "react-icons/ai";
@@ -28,8 +20,10 @@ import {
   taskFormMode,
   updateTask,
 } from "redux/taskSlice";
-import axios from "axios";
 import UploadedFiles from "./UploadedFiles";
+import useFetch from "hooks/useFetch";
+import usePost from "hooks/usePost";
+import usePatch from "hooks/usePatch";
 
 interface File {
   lastModified: number;
@@ -48,7 +42,7 @@ interface Validation {
   priority: string;
   progressStatus: string;
   members: Array<User> | [];
-  taskPay: number;
+  taskPay: string;
 }
 
 interface Values {
@@ -59,7 +53,7 @@ interface Values {
   priority: string;
   progressStatus: string;
   members: Array<User> | [];
-  taskPay: number;
+  taskPay: string;
 }
 
 interface Errors {
@@ -76,6 +70,9 @@ interface Errors {
 const error = {};
 
 const TaskForm: React.FC = () => {
+  const { handleFetch, fetchById } = useFetch();
+  const { create } = usePost();
+  const { update } = usePatch();
   const [files, setFiles] = useState<Array<File> | []>([]);
   const [members, setMembers] = useState<[]>([]);
   const [formValues, setFormValues] = useState<Values>({
@@ -86,7 +83,7 @@ const TaskForm: React.FC = () => {
     priority: "",
     progressStatus: "",
     members: members,
-    taskPay: 0,
+    taskPay: "",
   });
   const [errors, setErrors] = useState<Errors>(error);
 
@@ -96,26 +93,10 @@ const TaskForm: React.FC = () => {
 
   const users = useAppSelector((state) => state.tasks.users) as Array<User>;
   const mode = useAppSelector((state) => state.tasks.mode) as string;
+  const task = useAppSelector((state) => state.tasks.task) as TaskValues;
   const projects = useAppSelector((state) => state.tasks.projects) as
     | Array<Project>
     | [];
-
-  const getMyProjects = async () => {
-    const resp = await dispatch(getProjects());
-    if (resp.type !== "/fetch-projects/fulfilled") {
-      verifyStatus(resp.payload.status, navigate);
-      return;
-    }
-    return;
-  };
-
-  const getRoleUsers = async () => {
-    const resp = await dispatch(getUsers());
-    if (resp.payload === undefined) {
-      verifyStatus(401, navigate);
-      return;
-    }
-  };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { value, name } = e.target;
@@ -129,21 +110,22 @@ const TaskForm: React.FC = () => {
     return;
   };
 
-  const getTaskDetails = async (id: String) => {
-    const response: any = await dispatch(getTask(id));
-    if (response.type === "/get-task/rejected") {
-      verifyStatus(response.payload.status, navigate);
+  useEffect(() => {
+    handleFetch(getProjects);
+    handleFetch(getUsers);
+
+    if (id) {
+      fetchById(getTask, id);
+      dispatch(taskFormMode("update"));
       return;
     }
+    dispatch(taskFormMode("create"));
+  }, []);
 
-    if (response.payload.data.data) {
-      const filter = response.payload.data.data.assignTo.map((user: any) => ({
-        label: user.label,
-        value: user.value,
-      }));
-      setMembers(filter);
-
+  useEffect(() => {
+    if (id && task !== null && "dueDate" in task) {
       const {
+        assignTo,
         dueDate,
         priority,
         progressStatus,
@@ -151,8 +133,14 @@ const TaskForm: React.FC = () => {
         title,
         type,
         taskPay,
-      } = response.payload.data.data;
+      } = task;
 
+      const filter = assignTo.map((user: any) => ({
+        label: user.label,
+        value: user.value,
+      })) as [];
+
+      setMembers(filter);
       setFormValues({
         priority,
         progressStatus,
@@ -164,19 +152,7 @@ const TaskForm: React.FC = () => {
         taskPay: taskPay ?? "0",
       });
     }
-  };
-
-  useEffect(() => {
-    getMyProjects();
-    getRoleUsers();
-
-    if (id) {
-      getTaskDetails(id);
-      dispatch(taskFormMode("update"));
-      return;
-    }
-    dispatch(taskFormMode("create"));
-  }, []);
+  }, [task]);
 
   const validate = (values: Validation) => {
     const {
@@ -246,6 +222,7 @@ const TaskForm: React.FC = () => {
   const submitHandler = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setErrors(error);
+
     const validationResults = validate({ ...formValues, members });
     if (Object.keys(validationResults).length > 0) {
       setErrors(validationResults);
@@ -253,72 +230,39 @@ const TaskForm: React.FC = () => {
     }
 
     if (mode === "create") {
-      const resp: any = await dispatch(addTask(formValues));
-      if (resp.type !== "/task-create/fulfilled") {
-        verifyStatus(resp.payload.status, navigate);
-        return;
-      }
-
-      const taskId = resp.payload.data.id;
       const formData = new FormData();
       for (const file of files) {
         formData.append("files", file as any);
       }
 
-      const addFiles = await axios.post(
-        `${baseURL}/task/add/files/${taskId}`,
-        formData,
-        headerConfig
-      );
+      formData.append("dueDate", formValues["dueDate"]);
+      formData.append("project", formValues["project"]);
+      formData.append("title", formValues["title"]);
+      formData.append("type", formValues["type"]);
+      formData.append("taskPay", formValues["taskPay"]);
+      formData.append("members", JSON.stringify(formValues["members"]));
 
-      if (addFiles.status === 201 && files.length > 0) {
-        toast.success("Task created", { position: "top-right" });
-        setTimeout(() => navigate("/"), 1000);
-        return;
-      } else if (addFiles.status === 201 && files.length === 0) {
-        toast.success("Task Created.", { position: "top-right" });
-        setTimeout(() => navigate("/"), 1000);
-        return;
-      }
-
-      verifyStatus(addFiles.status, navigate);
-      return;
+      await create(addTask, formData);
+      navigate("/");
     }
 
     if (mode === "update") {
-      const resp: any = await dispatch(
-        updateTask({ ...formValues, members, id: id })
-      );
-      if (resp.type !== "/update-task/fulfilled") {
-        verifyStatus(resp.payload.status, navigate);
-        return;
+      const formData = new FormData();
+
+      for (const file of files) {
+        formData.append("files", file as any);
       }
 
-      if (resp.payload.status === 200 && files.length > 0) {
-        const formData = new FormData();
-        for (const file of files) {
-          formData.append("files", file as any);
-        }
+      formData.append("dueDate", formValues["dueDate"]);
+      formData.append("project", formValues["project"]);
+      formData.append("title", formValues["title"]);
+      formData.append("type", formValues["type"]);
+      formData.append("taskPay", formValues["taskPay"]);
+      formData.append("progressStatus", formValues["progressStatus"]);
+      formData.append("members", JSON.stringify(formValues["members"]));
 
-        const addFiles = await axios.post(
-          `${baseURL}/task/add/files/${id}`,
-          formData,
-          headerConfig
-        );
-
-        if (addFiles.status === 201 && files.length > 0) {
-          toast.success("Task Updated", { position: "top-right" });
-          setTimeout(() => navigate("/"), 1000);
-          return;
-        } else if (addFiles.status === 201 && files.length === 0) {
-          toast.success("Task updated.", { position: "top-right" });
-          setTimeout(() => navigate("/"), 1000);
-          return;
-        }
-
-        verifyStatus(addFiles.status, navigate);
-        return;
-      }
+      await update(updateTask, { values: formData, id });
+      navigate(`/home/task/${id}`);
     }
   };
 
@@ -550,7 +494,7 @@ const TaskForm: React.FC = () => {
               </div>
             </div>
 
-            <UploadedFiles taskId={id as string} />
+            {mode === "update" && <UploadedFiles taskId={id as string} />}
 
             <div className="mt-4 flex items-center justify-center">
               <button

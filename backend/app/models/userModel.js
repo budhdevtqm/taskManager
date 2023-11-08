@@ -78,7 +78,6 @@ module.exports.register = async (values) => {
       }
 
       if (user.isVerified) {
-        console.log("Verified User");
         return reject({
           ok: false,
           message: "This Email is already in use.",
@@ -251,7 +250,7 @@ module.exports.signin = async (values) => {
       }
 
       const token = await jwt.sign({ role, userId }, process.env.JWT_PRIVATE, {
-        expiresIn: "1m",
+        expiresIn: "1h",
       });
 
       resolve({
@@ -281,11 +280,29 @@ module.exports.getAll = async () => {
 module.exports.update = async (req) => {
   return new Promise(async (resolve, reject) => {
     try {
+      const id = req.params.id;
+      const { name, userRole, password } = req.body;
+      let encPass = "";
+      if (password !== "") {
+        encPass = await new Promise((resolve, reject) => {
+          bcrypt.hash(password, 10, (error, hash) => {
+            if (error) {
+              reject(error);
+            } else {
+              resolve(hash);
+            }
+          });
+        });
+      }
+
+      const { password: oldPassword } = await userSchema.findOne({ _id: id });
+
       await userSchema.findOneAndUpdate(
-        { _id: req.params.id },
+        { _id: id },
         {
-          ...req.body,
-          role: req.body.userRole,
+          name,
+          password: encPass ?? oldPassword,
+          role: userRole,
           updatedAt: new Date().getTime(),
         }
       );
@@ -303,12 +320,14 @@ module.exports.update = async (req) => {
 module.exports.getUserById = async (req) => {
   return new Promise(async (resolve, reject) => {
     try {
-      const user = await userSchema.findOne({ _id: req.params.id });
-      if (user === null) {
-        reject({ ok: false, status: 400, message: "User Not found!" });
-      } else {
-        resolve({ ok: true, data: { ...user, password: "" }, status: 200 });
-      }
+      const { name, email, role, image } = await userSchema.findOne({
+        _id: req.params.id,
+      });
+      resolve({
+        ok: true,
+        data: { name, email, role, image: image ?? "", password: "" },
+        status: 200,
+      });
     } catch (error) {
       reject({ ok: false, status: 400, message: "Something went wrong!" });
     }
@@ -431,8 +450,6 @@ module.exports.updateProfile = async (values) => {
 module.exports.upload = async (req) => {
   return new Promise(async (resolve, reject) => {
     try {
-      console.log("body", req.body);
-      console.log("file", req.file);
       await userSchema.updateOne(
         {
           _id: req.body.userId,

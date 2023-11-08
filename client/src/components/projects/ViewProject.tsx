@@ -31,19 +31,6 @@ const ViewProject: React.FC<PropsType> = ({ open, setOpen, project }) => {
             <p className="text-center px-2">{project.description}</p>
           </div>
         </div>
-        <div>
-          <h3 className="text-center my-2 py-2 bg-lightBlack text-white font-bold ">
-            Team Memebers
-          </h3>
-          {project?.members?.map((member, index) => (
-            <div
-              key={index}
-              className="my-1 p-2 rounded-lg bg-bgWhite hover:shadow-lg cursor-pointer"
-            >
-              <span className="text-start">{member.name}</span>
-            </div>
-          ))}
-        </div>
       </div>
     </Modal>
   );

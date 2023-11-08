@@ -3,16 +3,17 @@ import axios, { AxiosError } from "axios";
 import { baseURL, headerConfig } from "common/utils";
 
 export interface User {
-  name: String;
-  email: String;
-  _id: String;
+  name: string;
+  email: string;
+  _id: string;
   createdAt: Number;
   updatedAt: Number;
   status: Boolean;
   isVerified: Boolean;
-  role: String;
+  role: string;
+  password: string;
   _v: Number;
-  image?: String;
+  image?: string;
 }
 
 export interface ProfileValues {
@@ -28,7 +29,7 @@ interface UserState {
   errors: null | Partial<{}>;
   response: null | Partial<{}>;
   loading: Boolean;
-  mode: String;
+  mode: string;
   user: User | null;
   profile: ProfileValues | null;
 }
@@ -82,7 +83,7 @@ export const addUser = createAsyncThunk(
 export const updateUser = createAsyncThunk(
   "update/user",
   async (
-    values: { name: String; password: String; userRole: String; id: any },
+    values: { name: String; password: String; userRole: String; id: string },
     { rejectWithValue }
   ) => {
     try {
@@ -97,8 +98,12 @@ export const updateUser = createAsyncThunk(
         headerConfig
       );
       return response;
-    } catch (error: AxiosError | any) {
-      return rejectWithValue(error.response.data);
+    } catch (error) {
+      if (axios.isAxiosError(error)) {
+        return rejectWithValue(error.response?.data);
+      } else {
+        return rejectWithValue("An error occurred");
+      }
     }
   }
 );
@@ -112,8 +117,12 @@ export const fetchUser = createAsyncThunk(
         headerConfig
       );
       return response;
-    } catch (error: AxiosError | any) {
-      rejectWithValue(error.response.data);
+    } catch (error) {
+      if (axios.isAxiosError(error)) {
+        return rejectWithValue(error.response?.data);
+      } else {
+        return rejectWithValue("An error occurred");
+      }
     }
   }
 );
@@ -224,9 +233,9 @@ const userSlice = createSlice({
       .addCase(fetchUser.pending, (state) => {
         state.loading = true;
       })
-      .addCase(fetchUser.fulfilled, (state, action) => {
+      .addCase(fetchUser.fulfilled, (state, { payload }) => {
         state.loading = false;
-        state.user = action?.payload?.data?.data._doc;
+        state.user = payload?.data?.data;
       })
       .addCase(fetchUser.rejected, (state, { payload }) => {
         state.errors = payload as Partial<{}>;
@@ -243,6 +252,19 @@ const userSlice = createSlice({
       })
       .addCase(getProfile.rejected, (state) => {
         state.loading = false;
+      });
+
+    //update-user
+    builder
+      .addCase(updateUser.pending, (state) => {
+        state.loading = true;
+      })
+      .addCase(updateUser.fulfilled, (state, { payload }) => {
+        state.loading = false;
+      })
+      .addCase(updateUser.rejected, (state, { payload }) => {
+        state.loading = false;
+        console.log("er-payload", payload);
       });
   },
 });

@@ -1,10 +1,17 @@
-import { verifyStatus } from "common/utils";
 import React, { useEffect, useState } from "react";
-import { Toaster, toast } from "react-hot-toast";
+import useFetch from "hooks/useFetch";
+import usePatch from "hooks/usePatch";
+import usePost from "hooks/usePost";
+import { Toaster } from "react-hot-toast";
 import { useNavigate, useParams } from "react-router-dom";
-import { toggleMode } from "redux/authSlice";
 import { useAppDispatch, useAppSelector } from "redux/hooks";
-import { addUser, fetchUser, updateUser, userFormMode } from "redux/userSlice";
+import {
+  addUser,
+  fetchUser,
+  updateUser,
+  userFormMode,
+  User,
+} from "redux/userSlice";
 
 const roles = ["admin", "user", "superAdmin"];
 
@@ -30,10 +37,14 @@ const UserForm: React.FC = () => {
     role: "",
   });
 
+  const { fetchById } = useFetch();
+  const { update } = usePatch();
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
   const userId = useParams().id;
-  const mode = useAppSelector((state) => state.users.mode) as String;
+  const { create } = usePost();
+  const mode = useAppSelector((state) => state.users.mode) as string;
+  const user = useAppSelector((state) => state.users.user) as User | null;
 
   const changeHandler = (
     e:
@@ -93,74 +104,53 @@ const UserForm: React.FC = () => {
     }
 
     if (mode === "create") {
-      const resp: any = await dispatch(
-        addUser({ ...formValues, userRole: formValues.role })
-      );
-      if (resp.type === "create/user/rejected") {
-        if (resp.payload.status === 409) {
-          toast.error(resp.payload.message, { position: "top-right" });
-        }
-        verifyStatus(resp.payload.status, navigate);
-        return;
-      } else {
-        toast.success("User created successfully.", { position: "top-right" });
-        setTimeout(() => navigate("/users"), 1000);
-      }
+      await create(addUser, {
+        ...formValues,
+        userRole: formValues.role,
+      });
+      navigate("/users");
     }
 
     if (mode === "update") {
-      const resp: any = await dispatch(
-        updateUser({
-          name: formValues.name,
-          userRole: formValues.role,
-          password: formValues.password,
-          id: userId,
-        })
-      );
-      if (resp.type !== "update/user/fulfilled") {
-        verifyStatus(401, navigate);
-        return;
-      } else {
-        setTimeout(() => navigate("/users"), 1000);
-        toast.success("Updated successfully", { position: "top-right" });
-      }
-    }
-  };
-
-  const getUserDetails = async (id: String) => {
-    const response: any = await dispatch(fetchUser(id));
-    if (
-      response.type === "fetch/user/fulfilled" &&
-      response.payload === undefined
-    ) {
-      verifyStatus(401, navigate);
-      return;
-    } else {
-      setFormValues(response?.payload?.data?.data?._doc);
-      return;
+      await update(updateUser, {
+        name: formValues.name,
+        userRole: formValues.role,
+        password: formValues.password,
+        id: userId,
+      });
+      navigate("/users");
     }
   };
 
   useEffect(() => {
     if (userId) {
       dispatch(userFormMode("update"));
-      getUserDetails(userId);
+      fetchById(fetchUser, userId);
     } else {
       dispatch(userFormMode("create"));
     }
   }, []);
 
+  useEffect(() => {
+    if (user !== null && "name" in user && userId) {
+      const { name, email, role, password } = user;
+      setFormValues({ name, email, role, password });
+    }
+  }, [user]);
+
   return (
     <div className="h-full w-full mb-8">
       <div className="p-8">
-        <h1 className="text-start px-8 font-bold text-lg text-gray-500 italic">
+        <h1 className="text-start px-8 font-bold text-lg text-gray-500">
           {mode.toUpperCase()} USER
         </h1>
       </div>
       <div className="flex flex-col w-[50%] mx-auto my-8  p-8 bg-white rounded-lg shadow ">
         <form className="flex gap-4 flex-col mb-8" onSubmit={submitHandler}>
           <div className="flex flex-col gap-2">
-            <label className="text-gray-500 font-semibold" htmlFor="name">Name</label>
+            <label className="text-gray-500 font-semibold" htmlFor="name">
+              Name
+            </label>
             <input
               type="text"
               name="name"
@@ -174,7 +164,9 @@ const UserForm: React.FC = () => {
             )}
           </div>
           <div className="flex flex-col gap-2">
-            <label className="text-gray-500 font-semibold" htmlFor="email">Email</label>
+            <label className="text-gray-500 font-semibold" htmlFor="email">
+              Email
+            </label>
             <input
               type="text"
               name="email"
@@ -189,7 +181,9 @@ const UserForm: React.FC = () => {
             )}
           </div>
           <div className="flex flex-col gap-2">
-            <label className="text-gray-500 font-semibold" htmlFor="password">Password</label>
+            <label className="text-gray-500 font-semibold" htmlFor="password">
+              Password
+            </label>
             <input
               type="password"
               name="password"
@@ -203,7 +197,9 @@ const UserForm: React.FC = () => {
             )}
           </div>
           <div className="flex flex-col gap-2">
-            <label className="text-gray-500 font-semibold" htmlFor="role">Role</label>
+            <label className="text-gray-500 font-semibold" htmlFor="role">
+              Role
+            </label>
             <select
               className="rounded border p-1 w-full outline-none text-black"
               name="role"

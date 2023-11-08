@@ -1,7 +1,4 @@
-import axios, { AxiosError } from "axios";
-import { baseURL, headerConfig, verifyStatus } from "common/utils";
-import React, { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import React, { useEffect } from "react";
 import { ImCancelCircle } from "react-icons/im";
 import {
   BsFiletypePdf,
@@ -10,18 +7,11 @@ import {
   BsFiletypeXls,
   BsFiletypeTxt,
 } from "react-icons/bs";
-import { Toaster, toast } from "react-hot-toast";
-
-interface uploadedFile {
-  createdAt: number;
-  createdBy: string;
-  filename: string;
-  status: boolean;
-  taskId: string;
-  updatedAt: number;
-  __v: number;
-  _id: string;
-}
+import { Toaster } from "react-hot-toast";
+import { UploadedFile, deleteFile, getTaskFiles } from "../../redux/taskSlice";
+import useFetch from "hooks/useFetch";
+import { useAppSelector } from "redux/hooks";
+import useDelete from "hooks/useDelete";
 
 interface PropsTypes {
   taskId: string;
@@ -53,43 +43,27 @@ const renderFileIcon = (filename: string) => {
 };
 
 const UploadedFiles: React.FC<PropsTypes> = ({ taskId }) => {
-  const [uploadedFiles, setUploadedFiles] = useState<uploadedFile[] | []>([]);
-
-  const navigate = useNavigate();
-
-  const fetchFiles = async (taskId: string) => {
-    try {
-      const response = await axios.get(
-        baseURL + "/task/get-files/" + taskId,
-        headerConfig
-      );
-
-      setUploadedFiles(response.data.data);
-    } catch (error: any) {
-      verifyStatus(error?.response?.status, navigate);
-    }
-  };
+  const { fetchById } = useFetch();
+  const handleDelete = useDelete();
+  const files = useAppSelector((state) => state.tasks.files) as
+    | UploadedFile[]
+    | [];
 
   useEffect(() => {
     if (taskId) {
-      fetchFiles(taskId);
+      fetchById(getTaskFiles, taskId);
     }
   }, []);
 
   const deleteHandler = async (id: string) => {
-    try {
-      await axios.delete(baseURL + `/task/delete/file/${id}`, headerConfig);
-      toast.success("Deleted", { position: "top-right" });
-      fetchFiles(taskId);
-    } catch (error: any) {
-      verifyStatus(error?.response?.status, navigate);
-    }
+    await handleDelete(deleteFile, id);
+    await fetchById(getTaskFiles, taskId);
   };
   return (
     <>
-      {uploadedFiles.length > 0 && (
+      {files.length > 0 && (
         <div className="grid grid-cols-3 gap-4">
-          {uploadedFiles.map((file: uploadedFile) => (
+          {files.map((file: UploadedFile) => (
             <div
               title={file.filename}
               key={file._id}

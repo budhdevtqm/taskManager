@@ -2,7 +2,7 @@ const model = require("../models/taskModel");
 
 module.exports.addTask = async (req, res) => {
   try {
-    const response = await model.create(req.body);
+    const response = await model.create(req);
     res.status(response.status).json(response);
   } catch (error) {
     res.status(error.status).json(error);
@@ -32,7 +32,7 @@ module.exports.updateTask = async (req, res) => {
     const response = await model.update(req);
     res.status(response.status).json(response);
   } catch (error) {
-    res.status(error.status).josn(error);
+    res.status(error.status).json(error);
   }
 };
 
@@ -48,15 +48,6 @@ module.exports.deleteTask = async (req, res) => {
 module.exports.updateStatus = async (req, res) => {
   try {
     const response = await model.updateStatus(req);
-    res.status(response.status).json(response);
-  } catch (error) {
-    res.status(error.status).json(error);
-  }
-};
-
-module.exports.addFiles = async (req, res) => {
-  try {
-    const response = await model.addFiles(req);
     res.status(response.status).json(response);
   } catch (error) {
     res.status(error.status).json(error);

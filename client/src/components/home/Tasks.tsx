@@ -1,11 +1,11 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { getTasks } from "redux/taskSlice";
-import { useAppDispatch, useAppSelector } from "redux/hooks";
-import { verifyStatus, makeTitlePerfect, priorityClass } from "common/utils";
+import { useAppSelector } from "redux/hooks";
+import { makeTitlePerfect, priorityClass } from "common/utils";
 import Footer from "components/layout/Footer";
 import Filter from "./Filter";
-import { useLocation } from "react-router-dom";
+import useFetch from "hooks/useFetch";
 
 export interface FilterTypes {
   text?: string;
@@ -40,23 +40,13 @@ interface Task {
 }
 
 const Tasks: React.FC = () => {
+  const { handleFetch } = useFetch();
   const [filter, setFilter] = useState<FilterTypes>({ text: "", type: "" });
   const [filtered, setFiltered] = useState<Task[] | []>([]);
 
   const navigate = useNavigate();
-  const dispatch = useAppDispatch();
 
-  const tasks: any = useAppSelector((state) => state.tasks.tasks);
-
-  const getMyTasks = async () => {
-    const resp: any = await dispatch(getTasks());
-    if (resp.type === "/fetch-tasks/rejected") {
-      verifyStatus(resp.payload.status, navigate);
-      return;
-    }
-
-    setFiltered(resp.payload.data.data);
-  };
+  const tasks = useAppSelector((state) => state.tasks.tasks) as Task[] | [];
 
   const filterHandler = (values: FilterTypes, tasks: Task[]) => {
     const { text, type } = values;
@@ -94,7 +84,7 @@ const Tasks: React.FC = () => {
   };
 
   useEffect(() => {
-    getMyTasks();
+    handleFetch(getTasks);
   }, []);
 
   useEffect(() => {
@@ -102,6 +92,10 @@ const Tasks: React.FC = () => {
       filterHandler(filter, tasks);
     }
   }, [filter.text, filter.type]);
+
+  useEffect(() => {
+    setFiltered(tasks);
+  }, [tasks]);
 
   return (
     <>
@@ -141,7 +135,9 @@ const Tasks: React.FC = () => {
                   <h3 className="font-bold text-primary px-4 rounded-xl text-m">
                     {task.type}
                   </h3>
-                  <h1 className="font-bold text-gray-600 px-4 rounded-xl text-m">{`$ ${task.taskPay ?? 0}`}</h1>
+                  <h1 className="font-bold text-gray-600 px-4 rounded-xl text-m">{`$ ${
+                    task.taskPay ?? 0
+                  }`}</h1>
                 </div>
                 <p
                   onClick={() => navigate(`/home/task/${task._id}`)}

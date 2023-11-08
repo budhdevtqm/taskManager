@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { getDate, getTime, verifyStatus } from "common/utils";
+import { getDate, getTime } from "common/utils";
 import { BsInfoCircle, BsPencil, BsTrash } from "react-icons/bs";
 import { useNavigate } from "react-router-dom";
 import ViewProject from "./ViewProject";
@@ -10,14 +10,18 @@ import {
   projectFormMode,
 } from "redux/projectSlice";
 import { useAppDispatch, useAppSelector } from "redux/hooks";
-import { Toaster, toast } from "react-hot-toast";
+import { Toaster } from "react-hot-toast";
 import Footer from "components/layout/Footer";
+import useFetch from "hooks/useFetch";
+import useDelete from "hooks/useDelete";
 
 const Projects: React.FC = () => {
   const [open, setOpen] = useState(false);
   const [project, setProject] = useState<Project | null>(null);
   const navigate = useNavigate();
   const dispatch = useAppDispatch();
+  const { handleFetch } = useFetch();
+  const handleDelete = useDelete();
 
   const projects = useAppSelector(
     (state) => state.projects.projects
@@ -31,23 +35,9 @@ const Projects: React.FC = () => {
     }
   };
 
-  const getProjects = async () => {
-    const response = await dispatch(getAllProjects());
-    if (response.type === "fetch/projects/rejected") {
-      verifyStatus(response.payload.status, navigate);
-      return;
-    }
-  };
-
-  const handleDelete = async (id: String) => {
-    const resp: any = await dispatch(deleteProject(id));
-    if (resp.type !== "/delete-project/fulfilled") {
-      verifyStatus(resp.payload.status, navigate);
-      return;
-    }
-
-    toast.success("Deleted", { position: "top-right" });
-    getProjects();
+  const deleteHandler = async (id: string) => {
+    await handleDelete(deleteProject, id);
+    await handleFetch(getAllProjects);
   };
 
   const handleClose = () => {
@@ -55,7 +45,7 @@ const Projects: React.FC = () => {
   };
 
   useEffect(() => {
-    getProjects();
+    handleFetch(getAllProjects);
     dispatch(projectFormMode("create"));
   }, []);
 
@@ -159,7 +149,7 @@ const Projects: React.FC = () => {
                           />
                           <BsTrash
                             title="Delete"
-                            onClick={() => handleDelete(project?._id)}
+                            onClick={() => deleteHandler(project?._id)}
                           />
                         </td>
                       </tr>

@@ -4,7 +4,6 @@ const projectSchema = new mongoose.Schema(
   {
     name: String,
     description: String,
-    members: [{ name: String, id: String }],
     createdBy: { name: String, id: String },
     createdAt: Number,
     updatedAt: Number,

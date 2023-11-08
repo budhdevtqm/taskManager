@@ -1,17 +1,18 @@
-import { createSlice, PayloadAction, createAsyncThunk } from "@reduxjs/toolkit";
-import axios, { AxiosError } from "axios";
+import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
+import axios from "axios";
 import { baseURL, headerConfig } from "common/utils";
 
 export interface Project {
-  name?: String;
-  description?: String;
-  members?: [{ name: String; id: String }];
-  createdBy?: { name: String; id: String };
-  createdAt?: Number;
-  updatedAt?: Number;
-  status?: Boolean;
+  name?: string;
+  description?: string;
+  members?: [{ name: string; id: string }];
+  createdBy?: { name: string; id: string };
+  createdAt?: number;
+  updatedAt?: number;
+  status?: boolean;
   isCompleted?: Boolean;
-  _id: String;
+  _id: string;
+  dueDate: number;
 }
 
 export interface SomeDetails {
@@ -47,10 +48,7 @@ interface UpdateValues {
   dueDate: String;
   projectId: String;
   description: String;
-  members: Array<RoleUser>;
 }
-
-// interface UpdateValues {name:String, memebers, dueDate:String, description:String, projectId:String}
 
 export const getUsers = createAsyncThunk(
   "/get/users",
@@ -79,7 +77,7 @@ export const getProjectById = createAsyncThunk(
         `${baseURL}/project/${id}`,
         headerConfig
       );
-      return response.data.data;
+      return response;
     } catch (error) {
       if (axios.isAxiosError(error)) {
         return rejectWithValue(error.response?.data);
@@ -113,13 +111,12 @@ export const addProject = createAsyncThunk(
 export const updateProject = createAsyncThunk(
   "update/project",
   async (values: UpdateValues, { rejectWithValue }) => {
-    const { name, members, dueDate, description, projectId } = values;
+    const { name, dueDate, description, projectId } = values;
     try {
       const response = axios.patch(
         `${baseURL}/project/update/${projectId}`,
         {
           name,
-          members,
           dueDate,
           description,
         },
@@ -214,18 +211,6 @@ const projectSlice = createSlice({
         state.loading = false;
       });
 
-    // builder
-    //   .addCase(getAllUsers.pending, (state) => {
-    //     state.loading = true;
-    //   })
-    //   .addCase(getAllUsers.fulfilled, (state, { payload }) => {
-    //     state.loading = false;
-    //     // state.projects = payload;
-    //   })
-    //   .addCase(getAllUsers.rejected, (state) => {
-    //     state.loading = false;
-    //   });
-
     builder
       .addCase(getUsers.pending, (state) => {
         state.loading = true;
@@ -241,10 +226,11 @@ const projectSlice = createSlice({
     builder
       .addCase(getProjectById.pending, (state) => {
         state.loading = true;
+        state.project = null;
       })
       .addCase(getProjectById.fulfilled, (state, { payload }) => {
         state.loading = false;
-        state.project = payload as any;
+        state.project = payload.data.data;
       })
       .addCase(getProjectById.rejected, (state) => {
         state.loading = false;

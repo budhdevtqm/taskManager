@@ -2,7 +2,7 @@ const taskSchema = require("../schemas/taskSchema");
 const userSchema = require("../schemas/userSchema");
 const fileSchema = require("../schemas/fileSchema");
 
-module.exports.create = async (values) => {
+module.exports.create = async (req) => {
   return new Promise(async (resolve, reject) => {
     const {
       title,
@@ -13,15 +13,18 @@ module.exports.create = async (values) => {
       userId,
       type,
       taskPay,
-    } = values;
+    } = req.body;
+
+    console.log("memebers", members);
 
     const user = await userSchema.findOne({ _id: userId });
+    const files = req.files;
 
     try {
       const added = await new taskSchema({
         title,
         project,
-        assignTo: members,
+        assignTo: JSON.parse(members),
         dueDate: new Date(dueDate).getTime(),
         progressStatus: "pending",
         priority,
@@ -32,14 +35,29 @@ module.exports.create = async (values) => {
         type,
         taskPay,
       }).save();
+
+      if (files.length > 0) {
+        await Promise.all(
+          files.map(async (file) => {
+            return new fileSchema({
+              filename: file.filename,
+              createdAt: Date.now(),
+              updatedAt: 0,
+              taskId: added._id.toString(),
+              status: true,
+              createdBy: userId,
+            }).save();
+          })
+        );
+      }
+
       resolve({
         status: 201,
         ok: true,
         message: "Task created Successfully",
-        id: added._id.toString(),
       });
     } catch (er) {
-      console.log("er", er);
+      console.log('er", aldjfl;akjdf"', er);
       reject({ ok: false, status: 400, message: "Something went wrong!" });
     }
   });
@@ -95,6 +113,8 @@ module.exports.get = async (req) => {
 module.exports.update = async (req) => {
   const taskId = req.params.id;
   const values = req.body;
+  const files = req.files;
+
   return new Promise(async (resolve, reject) => {
     try {
       const {
@@ -106,6 +126,7 @@ module.exports.update = async (req) => {
         dueDate,
         members,
         taskPay,
+        userId,
       } = values;
 
       await taskSchema.findByIdAndUpdate(
@@ -119,11 +140,27 @@ module.exports.update = async (req) => {
           taskPay,
           dueDate: new Date(dueDate).getTime(),
           updatedAt: new Date().getTime(),
-          assignTo: members,
+          assignTo: JSON.parse(members),
         }
       );
+
+      if (files.length > 0) {
+        await Promise.all(
+          files.map(async (file) => {
+            return new fileSchema({
+              filename: file.filename,
+              createdAt: Date.now(),
+              updatedAt: 0,
+              taskId: taskId,
+              status: true,
+              createdBy: userId,
+            }).save();
+          })
+        );
+      }
       resolve({ ok: true, status: 200, message: "Updated successfully" });
     } catch (er) {
+      console.log("er", er);
       reject({
         ok: false,
         message: "something went wrong",
@@ -137,10 +174,8 @@ module.exports.delete = async (taskId) => {
   return new Promise(async (resolve, reject) => {
     try {
       const delte = await taskSchema.deleteOne({ _id: taskId });
-      console.log("delte", delte);
       resolve({ ok: true, status: 200, message: "deleted successfully..." });
     } catch (er) {
-      console.log("er", er);
       reject({
         ok: false,
         message: "something went wrong",
@@ -153,7 +188,7 @@ module.exports.delete = async (taskId) => {
 module.exports.updateStatus = async (req) => {
   return new Promise(async (resolve, reject) => {
     try {
-      const update = await taskSchema.updateOne(
+      await taskSchema.updateOne(
         { _id: req.params.id },
         {
           updatedAt: new Date().getTime(),
@@ -167,37 +202,6 @@ module.exports.updateStatus = async (req) => {
         message: "something went wrong",
         status: 400,
       });
-    }
-  });
-};
-
-module.exports.addFiles = async (req) => {
-  return new Promise(async (resolve, reject) => {
-    try {
-      const { userId } = req.body;
-      const { taskId } = req.params;
-      const files = req.files;
-
-      await Promise.all(
-        files.map(async (file) => {
-          return new fileSchema({
-            filename: file.filename,
-            createdAt: Date.now(),
-            updatedAt: 0,
-            taskId,
-            status: true,
-            createdBy: userId,
-          }).save();
-        })
-      );
-
-      resolve({
-        ok: true,
-        message: "Files uploaded successfully.",
-        status: 201,
-      });
-    } catch (error) {
-      reject({ ok: false, status: 400, message: "Something went wrong!" });
     }
   });
 };

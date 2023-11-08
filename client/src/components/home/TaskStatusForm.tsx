@@ -1,12 +1,9 @@
-import React, { SetStateAction, useState } from "react";
-import { useNavigate, useParams } from "react-router-dom";
-import { useAppDispatch } from "redux/hooks";
+import React, { useState } from "react";
+import { useParams } from "react-router-dom";
 import { getTask, updateStatus } from "redux/taskSlice";
-
-import { toast } from "react-hot-toast";
-import { status, verifyStatus } from "common/utils";
-
-type SetStateFunction = (status: boolean) => void;
+import { status } from "common/utils";
+import usePatch from "hooks/usePatch";
+import useFetch from "hooks/useFetch";
 
 interface ErrorValues {
   progressStatus?: String;
@@ -22,23 +19,15 @@ const validate = (values: { progressStatus: String }) => {
 };
 
 const TaskStatusForm: React.FC = () => {
+  const { update } = usePatch();
+  const { fetchById } = useFetch();
   const [formValues, setFormValues] = useState({ progressStatus: "" });
   const [errors, setErrors] = useState<ErrorValues>({});
-  const dispatch = useAppDispatch();
-  const navigate = useNavigate();
   const taskId = useParams().id as string;
 
   const changeHandler = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const { value, name } = e.target;
     setFormValues({ ...formValues, [name]: value });
-  };
-
-  const getTaskDetails = async (id: String) => {
-    const response: any = await dispatch(getTask(id));
-    if (response.type === "/get-task/rejected") {
-      verifyStatus(response.payload.status, navigate);
-      return;
-    }
   };
 
   const updateHandler = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -51,16 +40,11 @@ const TaskStatusForm: React.FC = () => {
       return;
     }
 
-    const response: any = await dispatch(
-      updateStatus({ id: taskId, ...formValues })
-    );
-
-    if (response.type === "/update-status/fulfilled") {
-      toast.success(response.payload.data.message, { position: "top-right" });
-      getTaskDetails(taskId);
-      return;
-    }
-    verifyStatus(response.payload.status, navigate);
+    await update(updateStatus, {
+      id: taskId,
+      ...formValues,
+    });
+    await fetchById(getTask, taskId);
   };
 
   return (
@@ -70,7 +54,10 @@ const TaskStatusForm: React.FC = () => {
         onSubmit={updateHandler}
       >
         <div className="flex flex-col">
-          <label className="text-gray-500 font-semibold" htmlFor="progressStatus">
+          <label
+            className="text-gray-500 font-semibold"
+            htmlFor="progressStatus"
+          >
             Update Status
           </label>
           <select

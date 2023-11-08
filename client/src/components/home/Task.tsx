@@ -1,19 +1,18 @@
-import React, { useEffect, useState } from "react";
-import {
-  baseURL,
-  getDate,
-  headerConfig,
-  priorityClass,
-  verifyStatus,
-} from "common/utils";
+import React, { useEffect } from "react";
+import { baseURL, getDate, priorityClass } from "common/utils";
 import { useNavigate, useParams } from "react-router-dom";
-import { useAppDispatch, useAppSelector } from "redux/hooks";
-import { deleteTask, getTask, TaskValues } from "redux/taskSlice";
-import { Toaster, toast } from "react-hot-toast";
+import { useAppSelector } from "redux/hooks";
+import {
+  deleteTask,
+  getTask,
+  getTaskFiles,
+  TaskValues,
+  UploadedFile,
+} from "redux/taskSlice";
+import { Toaster } from "react-hot-toast";
 import Footer from "components/layout/Footer";
 import { BsPencil, BsTrash } from "react-icons/bs";
 import TaskStatusForm from "./TaskStatusForm";
-import axios from "axios";
 import {
   BsFiletypePdf,
   BsFiletypeDoc,
@@ -21,17 +20,8 @@ import {
   BsFiletypeXls,
   BsFiletypeTxt,
 } from "react-icons/bs";
-
-interface uploadedFile {
-  createdAt: number;
-  createdBy: string;
-  filename: string;
-  status: boolean;
-  taskId: string;
-  updatedAt: number;
-  __v: number;
-  _id: string;
-}
+import useFetch from "hooks/useFetch";
+import useDelete from "hooks/useDelete";
 
 const iconStyle = "text-[60px] text-primary";
 
@@ -63,49 +53,26 @@ const openTab = (filename: string) => {
 };
 
 const Task: React.FC = () => {
-  const [uploadedFiles, setUploadedFiles] = useState<uploadedFile[] | []>([]);
   const navigate = useNavigate();
-  const dispatch = useAppDispatch();
+  const { fetchById } = useFetch();
+  const handleDelete = useDelete();
   const userRole = localStorage.getItem("role");
   const taskId = useParams().id as string;
 
   const task = useAppSelector((state) => state.tasks.task) as TaskValues;
-
-  const getTaskDetails = async (id: String) => {
-    const response: any = await dispatch(getTask(id));
-    if (response.type === "/get-task/rejected") {
-      verifyStatus(response.payload.status, navigate);
-      return;
-    }
-  };
+  const files = useAppSelector((state) => state.tasks.files) as
+    | UploadedFile[]
+    | [];
 
   const deleteHandler = async (id: string) => {
-    const response: any = await dispatch(deleteTask(id));
-    if (response.type === "/delete-task/fulfilled") {
-      toast.success("Deleted.", { position: "top-right" });
-      setTimeout(() => navigate("/"), 1000);
-      return;
-    }
-    verifyStatus(response.payload.status, navigate);
-  };
-
-  const fetchFiles = async (taskId: string) => {
-    try {
-      const response = await axios.get(
-        baseURL + "/task/get-files/" + taskId,
-        headerConfig
-      );
-
-      setUploadedFiles(response.data.data);
-    } catch (error: any) {
-      verifyStatus(error?.response?.status, navigate);
-    }
+    await handleDelete(deleteTask, id);
+    navigate("/");
   };
 
   useEffect(() => {
     if (taskId) {
-      getTaskDetails(taskId);
-      fetchFiles(taskId);
+      fetchById(getTask, taskId);
+      fetchById(getTaskFiles, taskId);
     }
   }, []);
 
@@ -115,6 +82,9 @@ const Task: React.FC = () => {
         <div className="min-h-full">
           <div className="flex px-8 py-4 items-center justify-between">
             <h1 className="font-bold text-primary text-[24px]">Task</h1>
+            {task.taskPay && (
+              <h4 className="font-semibold">{`$ ${task.taskPay}`}</h4>
+            )}
             <span
               title="Due Date"
               className="text-[16px] text-primary p-1 rounded "
@@ -187,9 +157,9 @@ const Task: React.FC = () => {
                 <h5 className="text-gray-400 text-center font-bold ">
                   DOCUMENTS
                 </h5>
-                {uploadedFiles.length > 0 ? (
+                {files.length > 0 ? (
                   <div className="grid grid-cols-3 gap-4">
-                    {uploadedFiles.map((file: uploadedFile) => (
+                    {files.map((file: UploadedFile) => (
                       <div
                         title={file.filename}
                         key={file._id}

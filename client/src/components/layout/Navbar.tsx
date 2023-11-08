@@ -6,7 +6,7 @@ interface Link {
   label: string;
 }
 
-const Navbar = () => {
+const Navbar: React.FC = () => {
   const [links, setLinks] = useState<Array<Link> | []>([]);
   const role = localStorage.getItem("role");
 
@@ -43,10 +43,7 @@ const Navbar = () => {
     <nav className="bg-primary h-full w-full">
       <ul className="w-full py-8">
         {links.map((link: Link, index) => (
-          <li
-            key={index}
-            className="w-[100%]  flex items-center"
-          >
+          <li key={index} className="w-[100%]  flex items-center">
             <NavLink
               to={link.path}
               className={({ isActive }) =>

@@ -1,6 +1,5 @@
-import React, { useState } from "react";
+import React from "react";
 import { Modal } from "react-responsive-modal";
-import { User } from "redux/userSlice";
 import { SigleUser } from "./Users";
 import { getDate } from "common/utils";
 

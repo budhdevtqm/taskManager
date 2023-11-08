@@ -2,7 +2,7 @@ import React from "react";
 import { Toaster, toast } from "react-hot-toast";
 import { NavLink, useNavigate } from "react-router-dom";
 
-const Header = () => {
+const Header: React.FC = () => {
   const navigate = useNavigate();
   const logoutHandler = () => {
     localStorage.removeItem("token");

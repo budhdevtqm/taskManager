@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React from "react";
 import { types } from "common/utils";
 import { FilterTypes } from "./Tasks";
 

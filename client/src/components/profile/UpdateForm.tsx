@@ -1,10 +1,10 @@
 import React, { useEffect, useState } from "react";
-import { baseURL, headerConfig, userImage, verifyStatus } from "common/utils";
-import { toast } from "react-hot-toast";
-import { useNavigate } from "react-router-dom";
-import { useAppDispatch } from "redux/hooks";
-import { getProfile, updateProfile } from "redux/userSlice";
+import { baseURL, headerConfig, userImage } from "common/utils";
+import { useAppSelector } from "redux/hooks";
+import { ProfileValues, getProfile, updateProfile } from "redux/userSlice";
 import axios from "axios";
+import useFetch from "hooks/useFetch";
+import usePatch from "hooks/usePatch";
 
 interface Values {
   name: string;
@@ -19,15 +19,6 @@ interface ErrorValues {
   image?: string;
 }
 
-interface File {
-  lastModified?: number;
-  lastModifiedDate?: string;
-  name?: string;
-  size?: number;
-  type?: string;
-  webkitRelativePath?: string;
-}
-
 const UpdateForm = () => {
   const [formValues, setFormValues] = useState<Values>({
     name: "",
@@ -36,21 +27,25 @@ const UpdateForm = () => {
     image: "",
   });
 
-  const navigate = useNavigate();
-  const dispatch = useAppDispatch();
+  const { update } = usePatch();
+  const { handleFetch } = useFetch();
   const [errors, setErrors] = useState<ErrorValues>({});
   const [file, setFile] = useState<any>({});
+
+  const profile = useAppSelector(
+    (state) => state.users.profile
+  ) as ProfileValues | null;
 
   const validate = (values: Values) => {
     let errors: ErrorValues = {};
     const { name, password } = values;
     if (!name || name.trim() === "") {
-      errors.name = "Required!";
+      errors.name = "Please enter name!";
     } else if (name.length < 3) {
       errors.name = "Name must be at least 3 characters!";
     }
     if (!password || password.trim() === "") {
-      errors.password = "Required!";
+      errors.password = "Please enter password!";
     } else if (
       !/^(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[@#$%^&+=!])(?=\S+$).{8,}$/.test(
         password
@@ -77,29 +72,7 @@ const UpdateForm = () => {
     }
     const { name, password } = formValues;
 
-    const resp: any = await dispatch(updateProfile({ name, password }));
-
-    if (resp.type === "/update-profile/fulfilled") {
-      toast.success("Profile Updated.", { position: "top-right" });
-      return;
-    }
-    verifyStatus(resp.payload.status, navigate);
-  };
-
-  const fetchPorfileData = async () => {
-    const response: any = await dispatch(getProfile());
-    if (response.type !== "/fetch-profile/fulfilled") {
-      verifyStatus(response.payload.status, navigate);
-      return;
-    }
-    const { name, email, password, image } = response.payload.data.data;
-
-    setFormValues({
-      name,
-      email,
-      password,
-      image: image ?? "",
-    });
+    await update(updateProfile, { name, password });
   };
 
   const uploadImage = async (file: any) => {
@@ -111,12 +84,12 @@ const UpdateForm = () => {
       headerConfig
     );
     if (response.status === 200) {
-      fetchPorfileData();
+      handleFetch(getProfile);
     }
   };
 
   useEffect(() => {
-    fetchPorfileData();
+    handleFetch(getProfile);
   }, []);
 
   useEffect(() => {
@@ -125,6 +98,19 @@ const UpdateForm = () => {
       setFile({});
     }
   }, [file]);
+
+  useEffect(() => {
+    if (profile !== null && "name" in profile) {
+      const { name, email, password, image } = profile;
+
+      setFormValues({
+        name,
+        email,
+        password,
+        image: image ?? "",
+      });
+    }
+  }, [profile]);
 
   return (
     <div className="w-[60%] mx-auto bg-white p-10 rounded-lg font-normal border-2 border-rounded">
